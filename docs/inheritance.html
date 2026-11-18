@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4. Inheritance and design - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html" aria-current="page">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>4. Inheritance and design</h1>
+<p class="lede">How classes build on each other.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>understand inheritance: a class that builds on another</li><li>tell the difference between <em>is-a</em> and <em>has-a</em> relationships</li><li>understand polymorphism: one method name, many behaviours</li><li>read a class diagram</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>draw a simple class diagram</li><li>explain why <code>Chaser</code> and <code>Sniper</code> can both be used as an <code>Alien</code></li><li>explain what <code>super().__init__</code> does</li></ul></div></div>
+
+<h2>Inheritance: "is a"</h2>
+<p>Many things in the game share the same jobs: they have a position, a picture and they play an animation. Rather than write that
+code again and again, one class holds it and others <strong>inherit</strong> it. A <code>Ship</code> <em>is an</em> <code>AnimatedSprite</code>.
+A <code>Chaser</code> <em>is an</em> <code>Alien</code>.</p>
+<figure class="diagram"><svg role="img" aria-label="Class diagram showing Sprite, AnimatedSprite and its subclasses" viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg"><rect x="290" y="10" width="160" height="34" rx="7" fill="#ffe9b8" stroke="#b86e00" stroke-width="2"/><text x="370.0" y="32" text-anchor="middle" font-size="13">arcade.Sprite</text><rect x="290" y="70" width="160" height="34" rx="7" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="370.0" y="92" text-anchor="middle" font-size="13">AnimatedSprite</text><line x1="370" y1="44" x2="370" y2="70" stroke="#0f7a8a" stroke-width="2"/><line x1="370" y1="104" x2="55" y2="150" stroke="#0f7a8a" stroke-width="2"/><rect x="10" y="150" width="90" height="34" rx="7" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="55.0" y="172" text-anchor="middle" font-size="13">Ship</text><line x1="370" y1="104" x2="155" y2="150" stroke="#0f7a8a" stroke-width="2"/><rect x="110" y="150" width="90" height="34" rx="7" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="155.0" y="172" text-anchor="middle" font-size="13">Rock</text><line x1="370" y1="104" x2="255" y2="150" stroke="#0f7a8a" stroke-width="2"/><rect x="210" y="150" width="90" height="34" rx="7" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="255.0" y="172" text-anchor="middle" font-size="13">PowerUp</text><line x1="370" y1="104" x2="355" y2="150" stroke="#0f7a8a" stroke-width="2"/><rect x="310" y="150" width="90" height="34" rx="7" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="355.0" y="172" text-anchor="middle" font-size="13">Wormhole</text><line x1="370" y1="104" x2="455" y2="150" stroke="#0f7a8a" stroke-width="2"/><rect x="410" y="150" width="90" height="34" rx="7" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="455.0" y="172" text-anchor="middle" font-size="13">Freighter</text><line x1="370" y1="104" x2="555" y2="150" stroke="#0f7a8a" stroke-width="2"/><rect x="510" y="150" width="90" height="34" rx="7" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="555.0" y="172" text-anchor="middle" font-size="13">Bullet</text><line x1="370" y1="104" x2="655" y2="150" stroke="#0f7a8a" stroke-width="2"/><rect x="610" y="150" width="90" height="34" rx="7" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="655.0" y="172" text-anchor="middle" font-size="13">Alien</text><line x1="655" y1="184" x2="50" y2="240" stroke="#0f7a8a" stroke-width="2"/><rect x="10" y="240" width="82" height="34" rx="7" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="51.0" y="262" text-anchor="middle" font-size="13">Drifter</text><line x1="655" y1="184" x2="138" y2="240" stroke="#0f7a8a" stroke-width="2"/><rect x="98" y="240" width="82" height="34" rx="7" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="139.0" y="262" text-anchor="middle" font-size="13">Chaser</text><line x1="655" y1="184" x2="226" y2="240" stroke="#0f7a8a" stroke-width="2"/><rect x="186" y="240" width="82" height="34" rx="7" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="227.0" y="262" text-anchor="middle" font-size="13">Sniper</text><line x1="655" y1="184" x2="314" y2="240" stroke="#0f7a8a" stroke-width="2"/><rect x="274" y="240" width="82" height="34" rx="7" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="315.0" y="262" text-anchor="middle" font-size="13">Swarm</text><line x1="655" y1="184" x2="402" y2="240" stroke="#0f7a8a" stroke-width="2"/><rect x="362" y="240" width="82" height="34" rx="7" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="403.0" y="262" text-anchor="middle" font-size="13">Seeker</text><line x1="655" y1="184" x2="490" y2="240" stroke="#0f7a8a" stroke-width="2"/><rect x="450" y="240" width="82" height="34" rx="7" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="491.0" y="262" text-anchor="middle" font-size="13">Teleporter</text><line x1="655" y1="184" x2="578" y2="240" stroke="#0f7a8a" stroke-width="2"/><rect x="538" y="240" width="82" height="34" rx="7" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="579.0" y="262" text-anchor="middle" font-size="13">Minelayer</text><line x1="655" y1="184" x2="666" y2="240" stroke="#0f7a8a" stroke-width="2"/><rect x="626" y="240" width="82" height="34" rx="7" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="667.0" y="262" text-anchor="middle" font-size="13">Mothership</text></svg><figcaption>The family tree of the game's sprite classes. Arrows go from a parent class down to its children.</figcaption></figure>
+<p>The top class, <code>arcade.Sprite</code>, comes from the Arcade library. It already knows how to hold a picture and draw it.
+<code>AnimatedSprite</code> adds one thing: it can flip through a sheet of pictures to make an animation.</p>
+<figure class="code"><figcaption><span class="file">game/sprites.py</span> <span class="lines">lines 18&ndash;38</span> <a class="code-link" data-file="game/sprites.py" data-start="18" data-end="38" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> AnimatedSprite(arcade.Sprite):
+    <span class="t-s">&quot;&quot;&quot;A sprite that plays a tile sequence described by a graphics spec.&quot;&quot;&quot;</span>
+
+    <span class="t-k">def</span> __init__(<span class="t-self">self</span>, spec, scale_mult=<span class="t-n">1.0</span>):
+        frames = load_frames(spec)
+        base_scale = float(spec.get(<span class="t-s">&quot;scale&quot;</span>, <span class="t-n">1.0</span>)) * scale_mult
+        super().__init__(frames[<span class="t-n">0</span>], scale=base_scale)
+        <span class="t-self">self</span>.frames = frames
+        <span class="t-self">self</span>.base_scale = base_scale
+        <span class="t-self">self</span>.fps = float(spec.get(<span class="t-s">&quot;fps&quot;</span>, <span class="t-n">0</span>))
+        <span class="t-self">self</span>._anim_time = random.random()
+        <span class="t-self">self</span>._frame = <span class="t-n">0</span>
+
+    <span class="t-k">def</span> animate(<span class="t-self">self</span>, dt):
+        <span class="t-k">if</span> <span class="t-self">self</span>.fps &lt;= <span class="t-n">0</span> <span class="t-k">or</span> len(<span class="t-self">self</span>.frames) &lt; <span class="t-n">2</span>:
+            <span class="t-k">return</span>
+        <span class="t-self">self</span>._anim_time += dt
+        idx = int(<span class="t-self">self</span>._anim_time * <span class="t-self">self</span>.fps) % len(<span class="t-self">self</span>.frames)
+        <span class="t-k">if</span> idx != <span class="t-self">self</span>._frame:
+            <span class="t-self">self</span>._frame = idx
+            <span class="t-self">self</span>.texture = <span class="t-self">self</span>.frames[idx]</code></pre><p class="code-note"><code>super().__init__(...)</code> runs the parent class's constructor first. Then this class adds its own attributes.</p></figure>
+<p>Now a <code>Ship</code> only needs to say what makes it different. This is the start of its class line:</p>
+<figure class="code"><figcaption><span class="file">game/sprites.py</span> <span class="lines">lines 58&ndash;61</span> <a class="code-link" data-file="game/sprites.py" data-start="58" data-end="61" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> Ship(AnimatedSprite):
+    <span class="t-k">def</span> __init__(<span class="t-self">self</span>, cfg=<span class="t-k">None</span>, tint=<span class="t-k">None</span>):
+        cfg = cfg <span class="t-k">or</span> settings.get(<span class="t-s">&quot;ships.scout&quot;</span>)
+        super().__init__(settings.get(<span class="t-s">f&quot;</span><span class="t-s">graphics.</span>{cfg.get(<span class="t-s">&#x27;graphic&#x27;</span>, <span class="t-s">&#x27;ship&#x27;</span>)}<span class="t-s">&quot;</span>)</code></pre></figure>
+
+<h2>Polymorphism: same name, different behaviour</h2>
+<p>Every alien has a method called <code>think</code>. Each kind of alien writes its own version. The game does not need to know which
+kind it has. It just calls <code>think</code> and each alien behaves in its own way. The word <strong>polymorphism</strong> means "many forms".</p>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 20&ndash;46</span> <a class="code-link" data-file="game/aliens.py" data-start="20" data-end="46" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> Alien(AnimatedSprite):
+    kind = <span class="t-s">&quot;drifter&quot;</span>
+    faces_heading = <span class="t-k">True</span>
+    needs_target = <span class="t-k">True</span>          <span class="t-c"># no visible ship -&gt; wander instead of thinking</span>
+    detect_range = <span class="t-n">0.0</span>           <span class="t-c"># &gt;0: notices hidden (cloaked / nebula) ships this close</span>
+
+    <span class="t-k">def</span> __init__(<span class="t-self">self</span>, x, y, level, overrides=<span class="t-k">None</span>):
+        cfg = dict(settings.get(<span class="t-s">f&quot;</span><span class="t-s">aliens.</span>{<span class="t-self">self</span>.kind}<span class="t-s">&quot;</span>))
+        cfg.update(overrides <span class="t-k">or</span> {})
+        super().__init__(settings.get(<span class="t-s">f&quot;</span><span class="t-s">graphics.alien_</span>{<span class="t-self">self</span>.kind}<span class="t-s">&quot;</span>))
+        <span class="t-self">self</span>.cfg = cfg
+        grow = <span class="t-n">1</span> + settings.get(<span class="t-s">&quot;difficulty.alien_health_per_level&quot;</span>) * max(<span class="t-n">0</span>, level - cfg[<span class="t-s">&quot;min_level&quot;</span>])
+        <span class="t-self">self</span>.max_health = cfg[<span class="t-s">&quot;health&quot;</span>] * grow
+        <span class="t-self">self</span>.health = <span class="t-self">self</span>.max_health
+        <span class="t-self">self</span>.speed = float(cfg[<span class="t-s">&quot;speed&quot;</span>])
+        <span class="t-self">self</span>.hit_radius = <span class="t-n">0.5</span> * min(<span class="t-self">self</span>.width, <span class="t-self">self</span>.height) * <span class="t-n">0.75</span>
+        <span class="t-self">self</span>.vx = <span class="t-self">self</span>.vy = <span class="t-n">0.0</span>
+        <span class="t-self">self</span>.heading = random.uniform(<span class="t-n">0</span>, <span class="t-n">360</span>)      <span class="t-c"># bearing, degrees clockwise from up</span>
+        <span class="t-self">self</span>.t = random.uniform(<span class="t-n">0</span>, <span class="t-n">10</span>)
+        interval = float(cfg.get(<span class="t-s">&quot;fire_interval&quot;</span>, <span class="t-n">0</span>))
+        <span class="t-self">self</span>.fire_timer = random.uniform(<span class="t-n">0.5</span>, max(<span class="t-n">0.6</span>, interval)) <span class="t-k">if</span> interval &gt; <span class="t-n">0</span> <span class="t-k">else</span> <span class="t-n">1e9</span>
+        <span class="t-self">self</span>.flash = <span class="t-n">0.0</span>
+        <span class="t-self">self</span>.ram_cd = <span class="t-n">0.0</span>
+        <span class="t-self">self</span>.minion = <span class="t-k">False</span>
+        <span class="t-self">self</span>.charging = <span class="t-k">False</span>
+        <span class="t-self">self</span>.target = <span class="t-k">None</span>                         <span class="t-c"># nearest ship, chosen every frame</span>
+        <span class="t-self">self</span>.center_x, <span class="t-self">self</span>.center_y = x, y</code></pre><p class="code-note">The base class sets up what every alien shares.</p></figure>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 73&ndash;90</span> <a class="code-link" data-file="game/aliens.py" data-start="73" data-end="90" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> update_alien(<span class="t-self">self</span>, dt, ctx):
+    <span class="t-self">self</span>.t += dt
+    <span class="t-self">self</span>.target = ctx.nearest_ship(<span class="t-self">self</span>.center_x, <span class="t-self">self</span>.center_y, <span class="t-self">self</span>)
+    <span class="t-k">if</span> <span class="t-self">self</span>.target <span class="t-k">is</span> <span class="t-k">None</span> <span class="t-k">and</span> <span class="t-self">self</span>.needs_target:
+        <span class="t-self">self</span>.wander(dt)
+    <span class="t-k">else</span>:
+        <span class="t-self">self</span>.think(dt, ctx)
+    <span class="t-self">self</span>.center_x += <span class="t-self">self</span>.vx * dt
+    <span class="t-self">self</span>.center_y += <span class="t-self">self</span>.vy * dt
+    ctx.world.wrap(<span class="t-self">self</span>)
+    <span class="t-self">self</span>.ram_cd = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.ram_cd - dt)
+    <span class="t-self">self</span>.flash = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.flash - dt)
+    <span class="t-k">if</span> <span class="t-self">self</span>.faces_heading <span class="t-k">and</span> (<span class="t-self">self</span>.vx <span class="t-k">or</span> <span class="t-self">self</span>.vy):
+        <span class="t-self">self</span>.angle = ANGLE_SIGN * math.degrees(math.atan2(<span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy))
+    hit_blink = <span class="t-self">self</span>.flash &gt; <span class="t-n">0</span> <span class="t-k">and</span> int(<span class="t-self">self</span>.flash * <span class="t-n">40</span>) % <span class="t-n">2</span> == <span class="t-n">0</span>
+    charge_blink = <span class="t-self">self</span>.charging <span class="t-k">and</span> int(<span class="t-self">self</span>.t * <span class="t-n">20</span>) % <span class="t-n">2</span> == <span class="t-n">0</span>
+    <span class="t-self">self</span>.alpha = <span class="t-n">140</span> <span class="t-k">if</span> (hit_blink <span class="t-k">or</span> charge_blink) <span class="t-k">else</span> <span class="t-n">255</span>
+    <span class="t-self">self</span>.animate(dt)</code></pre><p class="code-note"><code>self.think(dt, ctx)</code> calls <em>this</em> alien's own version.</p></figure>
+<p>Compare how two aliens fill in <code>think</code>. The Drifter wobbles along a wave. The Chaser turns toward you.</p>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 93&ndash;108</span> <a class="code-link" data-file="game/aliens.py" data-start="93" data-end="108" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> Drifter(Alien):
+    kind = <span class="t-s">&quot;drifter&quot;</span>
+    faces_heading = <span class="t-k">False</span>
+    needs_target = <span class="t-k">False</span>
+
+    <span class="t-k">def</span> __init__(<span class="t-self">self</span>, *a, **kw):
+        super().__init__(*a, **kw)
+        <span class="t-self">self</span>.base = math.radians(random.choice((<span class="t-n">45</span>, <span class="t-n">135</span>, <span class="t-n">225</span>, <span class="t-n">315</span>)))
+
+    <span class="t-k">def</span> think(<span class="t-self">self</span>, dt, ctx):
+        c = <span class="t-self">self</span>.cfg
+        bx, by = math.sin(<span class="t-self">self</span>.base), math.cos(<span class="t-self">self</span>.base)
+        wobble = c[<span class="t-s">&quot;wave_amp&quot;</span>] * c[<span class="t-s">&quot;wave_freq&quot;</span>] * math.cos(c[<span class="t-s">&quot;wave_freq&quot;</span>] * <span class="t-self">self</span>.t)
+        <span class="t-self">self</span>.vx = bx * <span class="t-self">self</span>.speed - by * wobble
+        <span class="t-self">self</span>.vy = by * <span class="t-self">self</span>.speed + bx * wobble
+        <span class="t-self">self</span>.angle += <span class="t-n">30</span> * dt</code></pre></figure>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 111&ndash;121</span> <a class="code-link" data-file="game/aliens.py" data-start="111" data-end="121" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> Chaser(Alien):
+    kind = <span class="t-s">&quot;chaser&quot;</span>
+
+    <span class="t-k">def</span> think(<span class="t-self">self</span>, dt, ctx):
+        dx, dy, _ = <span class="t-self">self</span>.to_ship(ctx)
+        wanted = math.degrees(math.atan2(dx, dy))
+        diff = (wanted - <span class="t-self">self</span>.heading + <span class="t-n">180</span>) % <span class="t-n">360</span> - <span class="t-n">180</span>
+        turn = <span class="t-self">self</span>.cfg[<span class="t-s">&quot;turn_rate&quot;</span>] * dt
+        <span class="t-self">self</span>.heading += max(-turn, min(turn, diff))
+        rad = math.radians(<span class="t-self">self</span>.heading)
+        <span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy = math.sin(rad) * <span class="t-self">self</span>.speed, math.cos(rad) * <span class="t-self">self</span>.speed</code></pre></figure>
+<p>A dictionary can turn a name such as <code>"chaser"</code> into the right class. This makes it easy to create aliens from a list of names:</p>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 304&ndash;306</span> <a class="code-link" data-file="game/aliens.py" data-start="304" data-end="306" href="https://github.com/">View on GitHub</a></figcaption><pre><code>ALIEN_CLASSES = {<span class="t-s">&quot;drifter&quot;</span>: Drifter, <span class="t-s">&quot;chaser&quot;</span>: Chaser, <span class="t-s">&quot;sniper&quot;</span>: Sniper, <span class="t-s">&quot;swarm&quot;</span>: Swarm,
+                 <span class="t-s">&quot;seeker&quot;</span>: Seeker, <span class="t-s">&quot;teleporter&quot;</span>: Teleporter, <span class="t-s">&quot;minelayer&quot;</span>: Minelayer,
+                 <span class="t-s">&quot;mothership&quot;</span>: Mothership}</code></pre></figure>
+
+<h2>Composition: "has a"</h2>
+<p>A <code>Player</code> is <em>not</em> a ship. A player <em>has a</em> ship, <em>has</em> weapons and <em>has</em> a score. When a class holds other objects
+as attributes, we call this <strong>composition</strong>. A good rule: use inheritance for <em>is-a</em>, composition for <em>has-a</em>.</p>
+<figure class="code"><figcaption><span class="file">game/player.py</span> <span class="lines">lines 19&ndash;36</span> <a class="code-link" data-file="game/player.py" data-start="19" data-end="36" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> reset(<span class="t-self">self</span>):
+    <span class="t-s">&quot;&quot;&quot;Fresh ship, weapons, score and perks (new game).&quot;&quot;&quot;</span>
+    cfg = settings.get(<span class="t-s">f&quot;</span><span class="t-s">ships.</span>{<span class="t-self">self</span>.ship_id}<span class="t-s">&quot;</span>)
+    <span class="t-self">self</span>.ship = Ship(cfg, TINTS.get(<span class="t-self">self</span>.id))
+    weapon = cfg.get(<span class="t-s">&quot;weapon&quot;</span>) <span class="t-k">or</span> <span class="t-k">None</span>
+    <span class="t-self">self</span>.weapons = WeaponSystem({<span class="t-n">7</span>: weapon} <span class="t-k">if</span> weapon <span class="t-k">else</span> <span class="t-k">None</span>)
+    <span class="t-self">self</span>.score = <span class="t-n">0.0</span>
+    <span class="t-self">self</span>.credits_run = <span class="t-n">0.0</span>
+    <span class="t-self">self</span>.alive = <span class="t-k">True</span>
+    <span class="t-self">self</span>.thrust_cooldown = <span class="t-n">0.0</span>
+    <span class="t-self">self</span>.last_want = <span class="t-n">1</span>
+    <span class="t-self">self</span>.perks = {}
+    <span class="t-self">self</span>.perk_options = []
+    <span class="t-self">self</span>.perk_choice = <span class="t-n">0</span>
+    <span class="t-self">self</span>.dmg_mult = <span class="t-n">1.0</span>
+    <span class="t-self">self</span>.cd_mult = <span class="t-n">1.0</span>
+    <span class="t-self">self</span>.credit_mult = <span class="t-n">1.0</span>
+    <span class="t-self">self</span>.magnet = <span class="t-n">0.0</span></code></pre></figure>
+
+<h2>Mixins: sharing a set of methods</h2>
+<p>The main game class got very big. To keep it tidy, the extra systems (credits, hazards, objectives, abilities and perks) live in a separate class called
+<code>FeaturesMixin</code>. The game class lists it as a parent so it can use all those methods:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 42&ndash;43</span> <a class="code-link" data-file="game/game_view.py" data-start="42" data-end="43" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> GameView(FeaturesMixin, arcade.View):
+    <span class="t-k">def</span> __init__(<span class="t-self">self</span>, host=<span class="t-k">False</span>):</code></pre></figure>
+<p>The class has <em>two</em> parents. This is called <strong>multiple inheritance</strong>. A mixin is a parent that is never used alone.</p>
+
+<h2>Encapsulation: keeping things tidy</h2>
+<p>A class keeps its own data and the methods that change it together. Other code should ask the object to do things rather than
+reach in and change everything. In the game, a ship's ability timers are changed by ship methods, and the game asks <code>ship.cloaked</code> instead of
+checking the timers itself. A name that starts with an underscore, like <code>_break_rock</code>, is a hint: <em>"this is for the class's own use"</em>.</p>
+
+<aside class="box tryit"><h3>Try it: draw it</h3><p>Draw a class diagram for a new kind of alien called <code>Bomber</code> that drops bombs. Which class does it inherit from? Which method must it write? Which attributes will it need?</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> Is a <code>Player</code> a <code>Ship</code>? Which relationship is it?</summary><div class="answer">No. A player <em>has a</em> ship. That is composition, not inheritance.</div></details><details><summary><strong>2.</strong> What does <code>super().__init__()</code> do?</summary><div class="answer">It runs the parent class's constructor so the parent's setup is done.</div></details><details><summary><strong>3.</strong> What is polymorphism? Give an example from the game.</summary><div class="answer">Different classes with the same method name behaving differently, such as each alien's <code>think</code> method.</div></details><details><summary><strong>4.</strong> Why does <code>ALIEN_CLASSES</code> make the code simpler?</summary><div class="answer">It looks up the class from a name, so one line can create any alien without a long chain of <code>if</code> statements.</div></details><details><summary><strong>5.</strong> Name one benefit of putting shared code in a parent class.</summary><div class="answer">Less repeated code, and a fix in one place helps every child class.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="classes-and-objects.html">&larr; 3. Classes and objects</a><a class="next" href="game-loop.html">5. The game loop &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

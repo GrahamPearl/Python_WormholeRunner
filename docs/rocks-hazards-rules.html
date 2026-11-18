@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10. Rocks, hazards and rules - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html" aria-current="page">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>10. Rocks, hazards and rules</h1>
+<p class="lede">Everything that can hurt you, and the rules that tie it all together.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>understand the five rock types and how a random choice is made</li><li>understand the hazards and what each one does to a ship</li><li>know the rules for objectives, perks, scoring and wormholes</li><li>read a few more examples of conditionals and loops</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>explain what 'chance weight' means</li><li>describe three hazards</li><li>list the order of events when a level is finished</li></ul></div></div>
+
+<h2>Rock types</h2>
+<p>A rock has a <em>kind</em>. The kind changes its colour and what happens when it breaks. In Expedition mode, each new rock picks its kind at random, but some kinds are more likely than others. Each kind has a <strong>weight</strong>. A bigger weight means more likely.</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Rock</th><th scope="col">From level</th><th scope="col">Chance weight</th><th scope="col">What it does</th></tr></thead><tbody><tr><td>Normal</td><td>1</td><td>60</td><td>Splits into two smaller rocks.</td></tr><tr><td><span style="display:inline-block;width:1.1em;height:1.1em;border-radius:4px;background:rgb(150,205,255);border:1px solid #555;vertical-align:middle"></span> Ice</td><td>2</td><td>14</td><td>Shatters into <strong>three</strong> pieces instead of two.</td></tr><tr><td><span style="display:inline-block;width:1.1em;height:1.1em;border-radius:4px;background:rgb(255,120,90);border:1px solid #555;vertical-align:middle"></span> Explosive</td><td>3</td><td>10</td><td>Blows up when destroyed. The blast hurts ships, aliens and other rocks, and can set off a chain.</td></tr><tr><td><span style="display:inline-block;width:1.1em;height:1.1em;border-radius:4px;background:rgb(255,215,70);border:1px solid #555;vertical-align:middle"></span> Gold</td><td>2</td><td>8</td><td>Pays extra credits when you destroy it.</td></tr><tr><td><span style="display:inline-block;width:1.1em;height:1.1em;border-radius:4px;background:rgb(175,180,195);border:1px solid #555;vertical-align:middle"></span> Metal</td><td>4</td><td>12</td><td>Armoured. It takes <strong>3 hits</strong> from bullets before it breaks.</td></tr></tbody></table></div>
+<figure class="code"><figcaption><span class="file">game/game_features.py</span> <span class="lines">lines 64&ndash;72</span> <a class="code-link" data-file="game/game_features.py" data-start="64" data-end="72" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _pick_rock_kind(<span class="t-self">self</span>):
+    <span class="t-k">if</span> <span class="t-k">not</span> <span class="t-self">self</span>.expedition:
+        <span class="t-k">return</span> <span class="t-s">&quot;normal&quot;</span>
+    pool = [(<span class="t-s">&quot;normal&quot;</span>, <span class="t-n">60</span>)]
+    <span class="t-k">for</span> kind, c <span class="t-k">in</span> settings.get(<span class="t-s">&quot;rock_types&quot;</span>).items():
+        <span class="t-k">if</span> <span class="t-self">self</span>.level &gt;= c[<span class="t-s">&quot;min_level&quot;</span>] <span class="t-k">and</span> c[<span class="t-s">&quot;weight&quot;</span>] &gt; <span class="t-n">0</span>:
+            pool.append((kind, c[<span class="t-s">&quot;weight&quot;</span>]))
+    kinds, weights = zip(*pool)
+    <span class="t-k">return</span> random.choices(kinds, weights)[<span class="t-n">0</span>]</code></pre><p class="code-note"><code>random.choices</code> picks one item using weights. A rock kind only goes into the pool once the level is high enough.</p></figure>
+<p>When a rock breaks it splits into smaller rocks, so a big rock can become many small ones. The smallest rocks simply disappear. Here is the splitting code. Ice uses three directions, everything else uses two:</p>
+<figure class="code"><figcaption><span class="file">game/sprites.py</span> <span class="lines">lines 182&ndash;199</span> <a class="code-link" data-file="game/sprites.py" data-start="182" data-end="199" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> split(<span class="t-self">self</span>):
+    <span class="t-s">&quot;&quot;&quot;Return smaller rocks (empty list for the smallest size). Ice shatters into three.&quot;&quot;&quot;</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.size_class &lt;= <span class="t-n">1</span>:
+        <span class="t-k">return</span> []
+    angle = settings.get(<span class="t-s">&quot;rocks.split_angle&quot;</span>)
+    factor = settings.get(<span class="t-s">&quot;rocks.split_speed&quot;</span>)
+    offsets = (angle, <span class="t-n">0.0</span>, -angle) <span class="t-k">if</span> <span class="t-self">self</span>.kind == <span class="t-s">&quot;ice&quot;</span> <span class="t-k">else</span> (angle, -angle)
+    kids = []
+    <span class="t-k">for</span> off <span class="t-k">in</span> offsets:
+        vx, vy = rotate(<span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy, off)
+        length = math.hypot(vx, vy) <span class="t-k">or</span> <span class="t-n">1.0</span>
+        ox = vx / length * <span class="t-self">self</span>.hit_radius * <span class="t-n">0.5</span>
+        oy = vy / length * <span class="t-self">self</span>.hit_radius * <span class="t-n">0.5</span>
+        kid = Rock(<span class="t-self">self</span>.size_class - <span class="t-n">1</span>, <span class="t-self">self</span>.center_x + ox, <span class="t-self">self</span>.center_y + oy,
+                   vx * factor, vy * factor, <span class="t-s">&quot;ice&quot;</span> <span class="t-k">if</span> <span class="t-self">self</span>.kind == <span class="t-s">&quot;ice&quot;</span> <span class="t-k">else</span> <span class="t-s">&quot;normal&quot;</span>)
+        kid.cooldown = <span class="t-n">0.6</span>
+        kids.append(kid)
+    <span class="t-k">return</span> kids</code></pre></figure>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 543&ndash;559</span> <a class="code-link" data-file="game/game_view.py" data-start="543" data-end="559" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _break_rock(<span class="t-self">self</span>, rock, pid=<span class="t-k">None</span>, depth=<span class="t-n">0</span>):
+    <span class="t-s">&quot;&quot;&quot;Remove a rock, replacing it with smaller ones if there is room. Gold pays credits,
+    explosive rocks blow up.&quot;&quot;&quot;</span>
+    kids = []
+    <span class="t-k">if</span> len(<span class="t-self">self</span>.rock_list) + <span class="t-n">1</span> &lt;= <span class="t-self">self</span>._max_rocks():
+        kids = rock.split()
+    rock.remove_from_sprite_lists()
+    <span class="t-k">for</span> kid <span class="t-k">in</span> kids:
+        <span class="t-self">self</span>.rock_list.append(kid)
+    <span class="t-self">self</span>._sfx(<span class="t-s">&quot;split&quot;</span>)
+    <span class="t-k">if</span> pid:
+        c = settings.get(<span class="t-s">&quot;credits&quot;</span>)
+        <span class="t-self">self</span>._earn(pid, c[<span class="t-s">&quot;rock_per_size&quot;</span>] * rock.size_class
+                   + (c[<span class="t-s">&quot;gold_rock&quot;</span>] * rock.size_class <span class="t-k">if</span> rock.kind == <span class="t-s">&quot;gold&quot;</span> <span class="t-k">else</span> <span class="t-n">0</span>))
+    <span class="t-k">if</span> rock.kind == <span class="t-s">&quot;explosive&quot;</span>:
+        <span class="t-self">self</span>._rock_explosion(rock.center_x, rock.center_y, <span class="t-n">80</span> + <span class="t-n">25</span> * rock.size_class, pid, depth)
+    <span class="t-k">return</span> kids</code></pre><p class="code-note">This is where gold pays credits and explosive rocks explode.</p></figure>
+
+<h2>Hazards</h2>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Hazard</th><th scope="col">From level</th><th scope="col">Effect</th></tr></thead><tbody><tr><td>Nebula</td><td>2</td><td>A cloud. Ships inside are hidden from aliens.</td></tr><tr><td>Black hole</td><td>3</td><td>Pulls ships and rocks toward it. Touching the centre hurts.</td></tr><tr><td>Ion storm</td><td>4</td><td>Abilities and shields stop recharging and the ship is jostled.</td></tr><tr><td>Solar flare</td><td>3</td><td>A glowing warning band appears, then a burst hurts everything in the band (25 damage to ships).</td></tr></tbody></table></div>
+<p>Hazards are small classes. The black hole is just a hazard with a "reach" and a core:</p>
+<figure class="code"><figcaption><span class="file">game/hazards.py</span> <span class="lines">lines 24&ndash;29</span> <a class="code-link" data-file="game/hazards.py" data-start="24" data-end="29" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> BlackHole(Hazard):
+    kind = <span class="t-s">&quot;blackhole&quot;</span>
+
+    <span class="t-k">def</span> __init__(<span class="t-self">self</span>, x, y):
+        super().__init__(x, y, <span class="t-n">650.0</span>)       <span class="t-c"># radius = how far the pull reaches</span>
+        <span class="t-self">self</span>.core = <span class="t-n">34.0</span></code></pre></figure>
+<p>The game applies their effects every frame. Look at how a loop goes over every hazard and every ship, and uses <code>if</code>/<code>elif</code> on the hazard's kind:</p>
+<figure class="code"><figcaption><span class="file">game/game_features.py</span> <span class="lines">lines 110&ndash;149</span> <a class="code-link" data-file="game/game_features.py" data-start="110" data-end="149" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _update_hazards(<span class="t-self">self</span>, dt):
+    <span class="t-k">for</span> p <span class="t-k">in</span> <span class="t-self">self</span>.players:
+        p.ship.in_nebula = <span class="t-k">False</span>
+        p.ship.jammed = <span class="t-k">False</span>
+    <span class="t-k">if</span> <span class="t-k">not</span> <span class="t-self">self</span>.expedition:
+        <span class="t-k">return</span>
+    cfg = settings.get(<span class="t-s">&quot;hazards&quot;</span>)
+    <span class="t-k">for</span> hz <span class="t-k">in</span> <span class="t-self">self</span>.hazards:
+        hz.update(dt, <span class="t-self">self</span>.world)
+        <span class="t-k">for</span> p <span class="t-k">in</span> <span class="t-self">self</span>.alive_players():
+            ship = p.ship
+            dx, dy = <span class="t-self">self</span>.world.delta(ship.center_x, ship.center_y, hz.x, hz.y)
+            d = math.hypot(dx, dy)
+            <span class="t-k">if</span> hz.kind == <span class="t-s">&quot;nebula&quot;</span>:
+                <span class="t-k">if</span> d &lt; hz.radius:
+                    ship.in_nebula = <span class="t-k">True</span>
+            <span class="t-k">elif</span> hz.kind == <span class="t-s">&quot;ion&quot;</span>:
+                <span class="t-k">if</span> d &lt; hz.radius:
+                    ship.jammed = <span class="t-k">True</span>
+                    <span class="t-k">if</span> <span class="t-k">not</span> ship.phased:
+                        ship.drift_x += random.uniform(-<span class="t-n">1</span>, <span class="t-n">1</span>) * <span class="t-n">220</span> * dt
+                        ship.drift_y += random.uniform(-<span class="t-n">1</span>, <span class="t-n">1</span>) * <span class="t-n">220</span> * dt
+            <span class="t-k">elif</span> hz.kind == <span class="t-s">&quot;blackhole&quot;</span> <span class="t-k">and</span> <span class="t-k">not</span> ship.phased <span class="t-k">and</span> d &lt; hz.radius:
+                ax, ay = gravity_accel(dx, dy, <span class="t-n">1.0</span>, cfg[<span class="t-s">&quot;blackhole_strength&quot;</span>], <span class="t-n">70.0</span>, <span class="t-n">420.0</span>)
+                ship.drift_x += ax * dt
+                ship.drift_y += ay * dt
+                <span class="t-k">if</span> d &lt; hz.core + ship.hit_radius:
+                    <span class="t-self">self</span>._damage_player(p, <span class="t-n">30</span>, hz.x, hz.y)
+        <span class="t-k">if</span> hz.kind == <span class="t-s">&quot;blackhole&quot;</span>:
+            <span class="t-k">for</span> rock <span class="t-k">in</span> list(<span class="t-self">self</span>.rock_list):
+                dx, dy = <span class="t-self">self</span>.world.delta(rock.center_x, rock.center_y, hz.x, hz.y)
+                d = math.hypot(dx, dy)
+                <span class="t-k">if</span> d &lt; hz.core:                        <span class="t-c"># swallowed</span>
+                    <span class="t-self">self</span>._add_effect(rock.center_x, rock.center_y, <span class="t-n">40</span>, <span class="t-n">0.4</span>, (<span class="t-n">150</span>, <span class="t-n">100</span>, <span class="t-n">255</span>))
+                    rock.remove_from_sprite_lists()
+                <span class="t-k">elif</span> d &lt; hz.radius:
+                    ax, ay = gravity_accel(dx, dy, <span class="t-n">1.0</span>, cfg[<span class="t-s">&quot;blackhole_strength&quot;</span>], <span class="t-n">70.0</span>, <span class="t-n">300.0</span>)
+                    rock.vx += ax * dt
+                    rock.vy += ay * dt
+    <span class="t-self">self</span>._update_flare(dt, cfg)</code></pre></figure>
+<figure class="code"><figcaption><span class="file">game/hazards.py</span> <span class="lines">lines 48&ndash;76</span> <a class="code-link" data-file="game/hazards.py" data-start="48" data-end="76" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> SolarFlare:
+    kind = <span class="t-s">&quot;flare&quot;</span>
+    WARN, ACTIVE = <span class="t-n">2.5</span>, <span class="t-n">0.8</span>
+
+    <span class="t-k">def</span> __init__(<span class="t-self">self</span>, world, thickness=<span class="t-n">140.0</span>):
+        <span class="t-self">self</span>.vertical = random.random() &lt; <span class="t-n">0.5</span>
+        <span class="t-self">self</span>.thickness = thickness
+        <span class="t-k">if</span> <span class="t-self">self</span>.vertical:
+            <span class="t-self">self</span>.x, <span class="t-self">self</span>.y = random.uniform(<span class="t-n">0</span>, world.width), world.height / <span class="t-n">2</span>
+            <span class="t-self">self</span>.w, <span class="t-self">self</span>.h = thickness, world.height
+        <span class="t-k">else</span>:
+            <span class="t-self">self</span>.x, <span class="t-self">self</span>.y = world.width / <span class="t-n">2</span>, random.uniform(<span class="t-n">0</span>, world.height)
+            <span class="t-self">self</span>.w, <span class="t-self">self</span>.h = world.width, thickness
+        <span class="t-self">self</span>.t = <span class="t-n">0.0</span>
+        <span class="t-self">self</span>.fired = <span class="t-k">False</span>
+
+    @property
+    <span class="t-k">def</span> phase(<span class="t-self">self</span>):                 <span class="t-c"># 0 = warning, 1 = burning</span>
+        <span class="t-k">return</span> <span class="t-n">0</span> <span class="t-k">if</span> <span class="t-self">self</span>.t &lt; <span class="t-self">self</span>.WARN <span class="t-k">else</span> <span class="t-n">1</span>
+
+    @property
+    <span class="t-k">def</span> finished(<span class="t-self">self</span>):
+        <span class="t-k">return</span> <span class="t-self">self</span>.t &gt;= <span class="t-self">self</span>.WARN + <span class="t-self">self</span>.ACTIVE
+
+    <span class="t-k">def</span> covers(<span class="t-self">self</span>, world, x, y, pad=<span class="t-n">0.0</span>):
+        dx, dy = world.delta(<span class="t-self">self</span>.x, <span class="t-self">self</span>.y, x, y)
+        <span class="t-k">if</span> <span class="t-self">self</span>.vertical:
+            <span class="t-k">return</span> abs(dx) &lt; <span class="t-self">self</span>.thickness / <span class="t-n">2</span> + pad
+        <span class="t-k">return</span> abs(dy) &lt; <span class="t-self">self</span>.thickness / <span class="t-n">2</span> + pad</code></pre><p class="code-note">A flare has a timer. Phase 0 is the warning, phase 1 is the burst. The <code>covers</code> method tests whether something is inside the band.</p></figure>
+
+<h2>Objectives</h2>
+<p>In Expedition mode, the wormhole stays closed until the level's objective is done. This is a rule the game checks every frame.</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Objective</th><th scope="col">How it works</th></tr></thead><tbody><tr><td>Collect crystals</td><td>Fly through the crystals (4 + level &divide; 2 of them).</td></tr><tr><td>Rescue pods</td><td>Touch the drifting pods (2 + level &divide; 3 of them).</td></tr><tr><td>Escort the freighter</td><td>Keep a slow cargo ship alive for 35 seconds. If it is destroyed, the wormhole still opens, but with no bonus.</td></tr><tr><td>Destroy the mothership</td><td>On every fifth level.</td></tr></tbody></table></div>
+<figure class="code"><figcaption><span class="file">game/game_features.py</span> <span class="lines">lines 195&ndash;223</span> <a class="code-link" data-file="game/game_features.py" data-start="195" data-end="223" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _setup_objective(<span class="t-self">self</span>, boss):
+    <span class="t-self">self</span>.freighter = <span class="t-k">None</span>
+    <span class="t-self">self</span>.freighter_list.clear()
+    obj = {<span class="t-s">&quot;type&quot;</span>: <span class="t-s">&quot;none&quot;</span>, <span class="t-s">&quot;need&quot;</span>: <span class="t-n">0</span>, <span class="t-s">&quot;got&quot;</span>: <span class="t-n">0</span>, <span class="t-s">&quot;done&quot;</span>: <span class="t-k">True</span>, <span class="t-s">&quot;ok&quot;</span>: <span class="t-k">False</span>,
+           <span class="t-s">&quot;time&quot;</span>: <span class="t-n">0.0</span>, <span class="t-s">&quot;total&quot;</span>: <span class="t-n">0.0</span>}
+    cfg = settings.get(<span class="t-s">&quot;objectives&quot;</span>)
+    <span class="t-k">if</span> boss:
+        obj.update(type=<span class="t-s">&quot;boss&quot;</span>, done=<span class="t-k">False</span>)
+    <span class="t-k">elif</span> <span class="t-self">self</span>.expedition <span class="t-k">and</span> cfg[<span class="t-s">&quot;enabled&quot;</span>] <span class="t-k">and</span> <span class="t-self">self</span>.level &gt;= <span class="t-n">2</span>:
+        kind = (<span class="t-s">&quot;crystals&quot;</span>, <span class="t-s">&quot;rescue&quot;</span>, <span class="t-s">&quot;escort&quot;</span>)[(<span class="t-self">self</span>.level - <span class="t-n">2</span>) % <span class="t-n">3</span>]
+        obj.update(type=kind, done=<span class="t-k">False</span>)
+        <span class="t-k">if</span> kind == <span class="t-s">&quot;crystals&quot;</span>:
+            obj[<span class="t-s">&quot;need&quot;</span>] = int(cfg[<span class="t-s">&quot;crystals_base&quot;</span>] + <span class="t-self">self</span>.level // <span class="t-n">2</span>)
+            <span class="t-k">for</span> _ <span class="t-k">in</span> range(obj[<span class="t-s">&quot;need&quot;</span>]):
+                x, y = <span class="t-self">self</span>._far_pos(<span class="t-n">200</span>)
+                <span class="t-self">self</span>.powerup_list.append(PowerUp(<span class="t-s">&quot;crystal&quot;</span>, x, y, permanent=<span class="t-k">True</span>))
+        <span class="t-k">elif</span> kind == <span class="t-s">&quot;rescue&quot;</span>:
+            obj[<span class="t-s">&quot;need&quot;</span>] = int(cfg[<span class="t-s">&quot;pods_base&quot;</span>] + <span class="t-self">self</span>.level // <span class="t-n">3</span>)
+            <span class="t-k">for</span> _ <span class="t-k">in</span> range(obj[<span class="t-s">&quot;need&quot;</span>]):
+                x, y = <span class="t-self">self</span>._far_pos(<span class="t-n">250</span>)
+                <span class="t-self">self</span>.powerup_list.append(PowerUp(
+                    <span class="t-s">&quot;pod&quot;</span>, x, y, permanent=<span class="t-k">True</span>,
+                    vx=random.uniform(-<span class="t-n">30</span>, <span class="t-n">30</span>), vy=random.uniform(-<span class="t-n">30</span>, <span class="t-n">30</span>)))
+        <span class="t-k">else</span>:
+            obj[<span class="t-s">&quot;total&quot;</span>] = float(cfg[<span class="t-s">&quot;escort_seconds&quot;</span>])
+            x, y = <span class="t-self">self</span>._far_pos(<span class="t-n">300</span>)
+            <span class="t-self">self</span>.freighter = Freighter(x, y)
+            <span class="t-self">self</span>.freighter_list.append(<span class="t-self">self</span>.freighter)
+    <span class="t-self">self</span>.objective = obj</code></pre></figure>
+
+<h2>Perks</h2>
+<p>After every level in Expedition mode you pick one of three random perks. In multiplayer the game waits until both players choose (or 20 seconds pass).</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Perk</th><th scope="col">Effect</th></tr></thead><tbody><tr><td><strong>Firepower</strong></td><td>+20% weapon damage</td></tr><tr><td><strong>Hull Plating</strong></td><td>+25 max health and repair 25</td></tr><tr><td><strong>Overdrive Engines</strong></td><td>+12% speed and acceleration</td></tr><tr><td><strong>Quick Cycle</strong></td><td>Abilities recharge 20% faster</td></tr><tr><td><strong>Tractor Field</strong></td><td>Pickups are drawn toward your ship</td></tr><tr><td><strong>Scavenger</strong></td><td>+25% credits earned</td></tr><tr><td><strong>Resupply</strong></td><td>Refill all ammunition now</td></tr><tr><td><strong>Barrier Cell</strong></td><td>+30 rechargeable shield</td></tr></tbody></table></div>
+<figure class="code"><figcaption><span class="file">game/perks.py</span> <span class="lines">lines 14&ndash;40</span> <a class="code-link" data-file="game/perks.py" data-start="14" data-end="40" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> apply_perk(player, perk_id):
+    ship = player.ship
+    player.perks[perk_id] = player.perks.get(perk_id, <span class="t-n">0</span>) + <span class="t-n">1</span>
+    <span class="t-k">if</span> perk_id == <span class="t-s">&quot;firepower&quot;</span>:
+        player.dmg_mult *= <span class="t-n">1.2</span>
+    <span class="t-k">elif</span> perk_id == <span class="t-s">&quot;armor&quot;</span>:
+        ship.max_health += <span class="t-n">25</span>
+        ship.health = min(ship.max_health, ship.health + <span class="t-n">25</span>)
+    <span class="t-k">elif</span> perk_id == <span class="t-s">&quot;engines&quot;</span>:
+        ship.speed_mult *= <span class="t-n">1.12</span>
+        ship.accel_mult *= <span class="t-n">1.12</span>
+    <span class="t-k">elif</span> perk_id == <span class="t-s">&quot;cooldown&quot;</span>:
+        player.cd_mult *= <span class="t-n">0.8</span>
+    <span class="t-k">elif</span> perk_id == <span class="t-s">&quot;magnet&quot;</span>:
+        player.magnet += <span class="t-n">170.0</span>
+    <span class="t-k">elif</span> perk_id == <span class="t-s">&quot;scavenger&quot;</span>:
+        player.credit_mult *= <span class="t-n">1.25</span>
+    <span class="t-k">elif</span> perk_id == <span class="t-s">&quot;resupply&quot;</span>:
+        <span class="t-k">for</span> slot <span class="t-k">in</span> range(<span class="t-n">1</span>, <span class="t-n">10</span>):
+            start = int(player.weapons.cfg(slot).get(<span class="t-s">&quot;ammo&quot;</span>, -<span class="t-n">1</span>))
+            <span class="t-k">if</span> start &gt; <span class="t-n">0</span>:
+                player.weapons.ammo[slot] = start
+    <span class="t-k">elif</span> perk_id == <span class="t-s">&quot;barrier&quot;</span>:
+        ship.shield_max += <span class="t-n">30.0</span>
+        ship.shield_hp = min(ship.shield_max, ship.shield_hp + <span class="t-n">30.0</span>)
+        ship.shield_rate = ship.shield_rate <span class="t-k">or</span> <span class="t-n">12.0</span>
+        ship.shield_delay = ship.shield_delay <span class="t-k">or</span> <span class="t-n">3.0</span></code></pre><p class="code-note">A long <code>if</code> / <code>elif</code> chain: exactly one branch runs, depending on which perk was picked.</p></figure>
+
+<h2>The rulebook</h2>
+<ol>
+<li>Rocks hurt ships. Each hit costs hull strength, then you get a short grace period.</li>
+<li>Bullets break rocks and hurt aliens. Kills earn score and credits.</li>
+<li>A level is finished when a ship enters an <em>open</em> wormhole. Then <strong>every</strong> player moves on.</li>
+<li>The wormhole will not open until the objective is done, and (on boss levels) the Mothership is destroyed.</li>
+<li>A destroyed ship comes back at the start of the next level with half its hull. The game is over when all ships are destroyed.</li>
+<li>The map grows each level, and rocks, aliens and gravity get stronger.</li>
+<li>In Classic mode there are no hazards, objectives, new aliens, rock types or perks.</li>
+</ol>
+
+<aside class="box tryit"><h3>Try it: add a rock type</h3><p>You can invent a rock kind using only the settings and one small code change:</p>
+<ol><li>Add <code>"slow"</code> to <code>"rock_types"</code> in <code>game/config.py</code>.</li>
+<li>Add a colour for it to <code>ROCK_TINTS</code> in <code>game/sprites.py</code>.</li>
+<li>Add an <code>if rock.kind == "slow":</code> rule in <code>_break_rock</code> that gives the player a bonus.</li></ol>
+<p>Which three files or places did you need to touch? Could this be made simpler?</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> An ice rock of size 3 breaks. How many rocks does it become?</summary><div class="answer">Three smaller rocks of size 2 (if there is room under the maximum).</div></details><details><summary><strong>2.</strong> If normal has weight 60 and gold has weight 8, which is more likely?</summary><div class="answer">Normal rocks.</div></details><details><summary><strong>3.</strong> Why does an ion storm stop shields from recharging?</summary><div class="answer">It is a rule: ships inside have <code>jammed</code> set to true, and the recharge code skips jammed ships.</div></details><details><summary><strong>4.</strong> What must happen before a wormhole opens on level 10?</summary><div class="answer">The objective must be finished and the Mothership destroyed.</div></details><details><summary><strong>5.</strong> Which statement runs in an <code>if</code> / <code>elif</code> chain: all matching branches, or just the first?</summary><div class="answer">Just the first one that is true.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="aliens.html">&larr; 9. Alien AI</a><a class="next" href="going-further.html">11. Going further &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

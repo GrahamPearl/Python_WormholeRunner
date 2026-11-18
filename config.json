@@ -1,0 +1,1177 @@
+{
+  "graphics": {
+    "ship": {
+      "file": "ship_sheet.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 12,
+      "scale": 1.0
+    },
+    "rock": {
+      "file": "rock_sheet.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 3,
+      "scale": 1.0
+    },
+    "wormhole": {
+      "file": "wormhole_sheet.png",
+      "frame_w": 128,
+      "frame_h": 128,
+      "frames": 8,
+      "fps": 12,
+      "scale": 1.2
+    },
+    "background": {
+      "file": "background_tiles.png",
+      "frame_w": 256,
+      "frame_h": 256,
+      "frames": 4,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "powerup_speed": {
+      "file": "powerup_speed.png",
+      "frame_w": 32,
+      "frame_h": 32,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "powerup_health": {
+      "file": "powerup_health.png",
+      "frame_w": 32,
+      "frame_h": 32,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "powerup_shield": {
+      "file": "powerup_shield.png",
+      "frame_w": 32,
+      "frame_h": 32,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "powerup_ammo": {
+      "file": "powerup_ammo.png",
+      "frame_w": 32,
+      "frame_h": 32,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_w1": {
+      "file": "bullet_w1.png",
+      "frame_w": 12,
+      "frame_h": 28,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_w2": {
+      "file": "bullet_w2.png",
+      "frame_w": 12,
+      "frame_h": 20,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_w3": {
+      "file": "bullet_w3.png",
+      "frame_w": 8,
+      "frame_h": 16,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_w4": {
+      "file": "bullet_w4.png",
+      "frame_w": 16,
+      "frame_h": 32,
+      "frames": 2,
+      "fps": 10,
+      "scale": 1.0
+    },
+    "bullet_w5": {
+      "file": "bullet_w5.png",
+      "frame_w": 8,
+      "frame_h": 48,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_w6": {
+      "file": "bullet_w6.png",
+      "frame_w": 32,
+      "frame_h": 32,
+      "frames": 2,
+      "fps": 3,
+      "scale": 1.0
+    },
+    "bullet_w7": {
+      "file": "bullet_w1.png",
+      "frame_w": 12,
+      "frame_h": 28,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_w8": {
+      "file": "bullet_w1.png",
+      "frame_w": 12,
+      "frame_h": 28,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_w9": {
+      "file": "bullet_w1.png",
+      "frame_w": 12,
+      "frame_h": 28,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "alien_drifter": {
+      "file": "alien_drifter.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 6,
+      "scale": 0.9
+    },
+    "alien_chaser": {
+      "file": "alien_chaser.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 12,
+      "scale": 0.8
+    },
+    "alien_sniper": {
+      "file": "alien_sniper.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 6,
+      "scale": 0.9
+    },
+    "alien_swarm": {
+      "file": "alien_swarm.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 10,
+      "scale": 0.6
+    },
+    "alien_mothership": {
+      "file": "alien_mothership.png",
+      "frame_w": 128,
+      "frame_h": 128,
+      "frames": 4,
+      "fps": 4,
+      "scale": 1.6
+    },
+    "alien_bullet": {
+      "file": "alien_bullet.png",
+      "frame_w": 16,
+      "frame_h": 16,
+      "frames": 2,
+      "fps": 8,
+      "scale": 1.0
+    },
+    "alien_seeker": {
+      "file": "alien_seeker.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 8,
+      "scale": 0.9
+    },
+    "alien_teleporter": {
+      "file": "alien_teleporter.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 8,
+      "scale": 0.9
+    },
+    "alien_minelayer": {
+      "file": "alien_minelayer.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 5,
+      "scale": 1.0
+    },
+    "alien_mine": {
+      "file": "alien_mine.png",
+      "frame_w": 32,
+      "frame_h": 32,
+      "frames": 2,
+      "fps": 3,
+      "scale": 0.8
+    },
+    "ship_phantom": {
+      "file": "ship_phantom.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 12,
+      "scale": 1.0
+    },
+    "ship_skipper": {
+      "file": "ship_skipper.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 12,
+      "scale": 1.0
+    },
+    "ship_specter": {
+      "file": "ship_specter.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 12,
+      "scale": 1.0
+    },
+    "ship_bulwark": {
+      "file": "ship_bulwark.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 10,
+      "scale": 1.1
+    },
+    "ship_medic": {
+      "file": "ship_medic.png",
+      "frame_w": 64,
+      "frame_h": 64,
+      "frames": 4,
+      "fps": 12,
+      "scale": 1.0
+    },
+    "bullet_phantom": {
+      "file": "bullet_phantom.png",
+      "frame_w": 6,
+      "frame_h": 40,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_skipper": {
+      "file": "bullet_skipper.png",
+      "frame_w": 32,
+      "frame_h": 32,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_specter": {
+      "file": "bullet_specter.png",
+      "frame_w": 10,
+      "frame_h": 56,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_bulwark": {
+      "file": "bullet_bulwark.png",
+      "frame_w": 10,
+      "frame_h": 10,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "bullet_medic": {
+      "file": "bullet_medic.png",
+      "frame_w": 16,
+      "frame_h": 16,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.0
+    },
+    "objective_crystal": {
+      "file": "objective_crystal.png",
+      "frame_w": 32,
+      "frame_h": 32,
+      "frames": 2,
+      "fps": 3,
+      "scale": 1.0
+    },
+    "objective_pod": {
+      "file": "objective_pod.png",
+      "frame_w": 40,
+      "frame_h": 40,
+      "frames": 2,
+      "fps": 2,
+      "scale": 1.0
+    },
+    "objective_freighter": {
+      "file": "objective_freighter.png",
+      "frame_w": 96,
+      "frame_h": 96,
+      "frames": 1,
+      "fps": 0,
+      "scale": 1.2
+    }
+  },
+  "physics": {
+    "gravity": 600000.0,
+    "max_accel": 320.0,
+    "softening": 50.0,
+    "drift_damping": 0.8
+  },
+  "ship": {
+    "max_speed": 420.0,
+    "acceleration": 240.0,
+    "turn_rate": 170.0,
+    "max_health": 100,
+    "hit_damage": 25,
+    "health_gain": 35,
+    "grace_time": 1.5,
+    "boost_multiplier": 1.6
+  },
+  "rocks": {
+    "count": 6,
+    "min_speed": 50.0,
+    "max_speed": 130.0,
+    "split_angle": 35.0,
+    "split_speed": 1.2,
+    "split_on_rock_hit": true,
+    "max_rocks": 40,
+    "respawn_time": 6.0,
+    "alien_damage": 15
+  },
+  "timing": {
+    "powerup_interval": 8.0,
+    "powerup_lifetime": 10.0,
+    "wormhole_min_delay": 6.0,
+    "wormhole_max_delay": 14.0,
+    "wormhole_lifetime": 7.0,
+    "speed_boost_time": 6.0,
+    "invincible_time": 6.0
+  },
+  "difficulty": {
+    "extra_rocks_per_level": 1,
+    "speed_per_level": 0.08,
+    "gravity_per_level": 0.1,
+    "alien_health_per_level": 0.1,
+    "alien_drop_chance": 0.3
+  },
+  "game": {
+    "mode": "classic"
+  },
+  "credits": {
+    "start_credits": 700,
+    "alien_factor": 0.2,
+    "rock_per_size": 2,
+    "gold_rock": 30,
+    "powerup": 5,
+    "crystal": 8,
+    "rescue": 25,
+    "level_clear": 20,
+    "objective": 30
+  },
+  "rock_types": {
+    "ice": {
+      "min_level": 2,
+      "weight": 14
+    },
+    "explosive": {
+      "min_level": 3,
+      "weight": 10
+    },
+    "gold": {
+      "min_level": 2,
+      "weight": 8
+    },
+    "metal": {
+      "min_level": 4,
+      "weight": 12
+    }
+  },
+  "hazards": {
+    "nebula_from": 2,
+    "blackhole_from": 3,
+    "ion_from": 4,
+    "flare_from": 3,
+    "blackhole_strength": 7000000.0,
+    "flare_interval": 30.0,
+    "flare_damage": 25,
+    "cloak_detect": 140.0
+  },
+  "objectives": {
+    "enabled": true,
+    "crystals_base": 4,
+    "pods_base": 2,
+    "escort_seconds": 35.0,
+    "freighter_health": 150
+  },
+  "ships": {
+    "scout": {
+      "name": "Scout",
+      "price": 0,
+      "desc": "Balanced starter ship.",
+      "graphic": "ship",
+      "health": 100,
+      "speed_mult": 1.0,
+      "accel_mult": 1.0,
+      "turn_mult": 1.0,
+      "ability": {},
+      "passive": {},
+      "weapon": {}
+    },
+    "phantom": {
+      "name": "Phantom",
+      "price": 600,
+      "desc": "Stealth. Cloak hides you from aliens for a few seconds.",
+      "graphic": "ship_phantom",
+      "health": 80,
+      "speed_mult": 1.05,
+      "accel_mult": 1.0,
+      "turn_mult": 1.1,
+      "ability": {
+        "type": "cloak",
+        "name": "Cloak",
+        "cooldown": 12.0,
+        "duration": 6.0,
+        "desc": "Invisible to aliens. Firing (except the Silent Bolt) or being hit breaks it."
+      },
+      "passive": {},
+      "weapon": {
+        "enabled": true,
+        "name": "Silent Bolt",
+        "type": "bolt",
+        "unlock_level": 1,
+        "damage": 55,
+        "speed": 1500,
+        "cooldown": 1.1,
+        "range": 1600,
+        "ammo": -1,
+        "ammo_pack": 0,
+        "count": 1,
+        "spread": 0.0,
+        "pierce": 1,
+        "turn_rate": 0.0,
+        "blast_radius": 0.0,
+        "fuse": 0.0,
+        "sound": "fire_phantom",
+        "graphic": "bullet_phantom",
+        "silent": true,
+        "heal": 0
+      }
+    },
+    "skipper": {
+      "name": "Skipper",
+      "price": 800,
+      "desc": "Hit-and-run. Hyperjump to a random safe spot on the map.",
+      "graphic": "ship_skipper",
+      "health": 90,
+      "speed_mult": 1.0,
+      "accel_mult": 1.15,
+      "turn_mult": 1.0,
+      "ability": {
+        "type": "hyperjump",
+        "name": "Hyperjump",
+        "cooldown": 8.0,
+        "desc": "Instantly jump to a random safe position with a moment of protection."
+      },
+      "passive": {},
+      "weapon": {
+        "enabled": true,
+        "name": "Jump-blast",
+        "type": "pulse",
+        "unlock_level": 1,
+        "damage": 35,
+        "speed": 0,
+        "cooldown": 2.0,
+        "range": 0,
+        "ammo": -1,
+        "ammo_pack": 0,
+        "count": 1,
+        "spread": 0.0,
+        "pierce": 1,
+        "turn_rate": 0.0,
+        "blast_radius": 170.0,
+        "fuse": 0.0,
+        "sound": "fire_skipper",
+        "graphic": "bullet_skipper",
+        "silent": false,
+        "heal": 0
+      }
+    },
+    "specter": {
+      "name": "Specter",
+      "price": 1000,
+      "desc": "Evasion. Hyperspace lets rocks and aliens pass straight through you.",
+      "graphic": "ship_specter",
+      "health": 85,
+      "speed_mult": 1.0,
+      "accel_mult": 1.0,
+      "turn_mult": 1.0,
+      "ability": {
+        "type": "hyperspace",
+        "name": "Hyperspace",
+        "cooldown": 14.0,
+        "duration": 3.0,
+        "desc": "3 seconds immune to rocks, aliens and bullets - but you cannot fire or collect."
+      },
+      "passive": {},
+      "weapon": {
+        "enabled": true,
+        "name": "Phase Lance",
+        "type": "bolt",
+        "unlock_level": 1,
+        "damage": 28,
+        "speed": 1000,
+        "cooldown": 0.7,
+        "range": 1200,
+        "ammo": -1,
+        "ammo_pack": 0,
+        "count": 1,
+        "spread": 0.0,
+        "pierce": 8,
+        "turn_rate": 0.0,
+        "blast_radius": 0.0,
+        "fuse": 0.0,
+        "sound": "fire_specter",
+        "graphic": "bullet_specter",
+        "silent": false,
+        "heal": 0
+      }
+    },
+    "bulwark": {
+      "name": "Bulwark",
+      "price": 1200,
+      "desc": "Tank. A rechargeable shield soaks up damage; Deflect throws shots back.",
+      "graphic": "ship_bulwark",
+      "health": 130,
+      "speed_mult": 0.85,
+      "accel_mult": 0.9,
+      "turn_mult": 0.85,
+      "ability": {
+        "type": "deflect",
+        "name": "Deflect",
+        "cooldown": 9.0,
+        "duration": 1.6,
+        "desc": "Reflect alien bullets and shrug off rocks while active."
+      },
+      "passive": {
+        "shield_max": 60.0,
+        "shield_delay": 3.0,
+        "shield_rate": 14.0
+      },
+      "weapon": {
+        "enabled": true,
+        "name": "Flak Cannon",
+        "type": "bolt",
+        "unlock_level": 1,
+        "damage": 7,
+        "speed": 700,
+        "cooldown": 0.8,
+        "range": 380,
+        "ammo": -1,
+        "ammo_pack": 0,
+        "count": 7,
+        "spread": 36.0,
+        "pierce": 1,
+        "turn_rate": 0.0,
+        "blast_radius": 0.0,
+        "fuse": 0.0,
+        "sound": "fire_bulwark",
+        "graphic": "bullet_bulwark",
+        "silent": false,
+        "heal": 0
+      }
+    },
+    "medic": {
+      "name": "Medic",
+      "price": 900,
+      "desc": "Support. Heals itself over time and repairs your partner.",
+      "graphic": "ship_medic",
+      "health": 95,
+      "speed_mult": 0.95,
+      "accel_mult": 1.0,
+      "turn_mult": 1.0,
+      "ability": {
+        "type": "repair",
+        "name": "Repair Burst",
+        "cooldown": 12.0,
+        "duration": 3.0,
+        "range": 360.0,
+        "self_rate": 8.0,
+        "ally_rate": 12.0,
+        "desc": "For 3 seconds heal yourself and any ally within range."
+      },
+      "passive": {
+        "regen": 1.5,
+        "regen_delay": 2.0
+      },
+      "weapon": {
+        "enabled": true,
+        "name": "Repair Dart",
+        "type": "bolt",
+        "unlock_level": 1,
+        "damage": 10,
+        "speed": 800,
+        "cooldown": 0.5,
+        "range": 700,
+        "ammo": -1,
+        "ammo_pack": 0,
+        "count": 1,
+        "spread": 0.0,
+        "pierce": 1,
+        "turn_rate": 0.0,
+        "blast_radius": 0.0,
+        "fuse": 0.0,
+        "sound": "fire_medic",
+        "graphic": "bullet_medic",
+        "silent": false,
+        "heal": 15
+      }
+    }
+  },
+  "net": {
+    "player_name": "Pilot",
+    "port": 5555,
+    "last_ip": "192.168.1.2",
+    "snapshot_rate": 30,
+    "timeout": 6.0
+  },
+  "world": {
+    "growth_per_level": 0.25,
+    "max_scale": 3.0,
+    "zoom_speed": 1.5
+  },
+  "weapons": {
+    "w1": {
+      "enabled": true,
+      "name": "Blaster",
+      "type": "bolt",
+      "unlock_level": 1,
+      "damage": 10,
+      "speed": 700,
+      "cooldown": 0.25,
+      "range": 900,
+      "ammo": -1,
+      "ammo_pack": 0,
+      "count": 1,
+      "spread": 0.0,
+      "pierce": 1,
+      "turn_rate": 0.0,
+      "blast_radius": 0.0,
+      "fuse": 0.0,
+      "sound": "fire_w1",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    },
+    "w2": {
+      "enabled": true,
+      "name": "Spread",
+      "type": "bolt",
+      "unlock_level": 1,
+      "damage": 8,
+      "speed": 600,
+      "cooldown": 0.5,
+      "range": 600,
+      "ammo": 30,
+      "ammo_pack": 15,
+      "count": 3,
+      "spread": 24.0,
+      "pierce": 1,
+      "turn_rate": 0.0,
+      "blast_radius": 0.0,
+      "fuse": 0.0,
+      "sound": "fire_w1",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    },
+    "w3": {
+      "enabled": true,
+      "name": "Rapid",
+      "type": "bolt",
+      "unlock_level": 2,
+      "damage": 4,
+      "speed": 800,
+      "cooldown": 0.08,
+      "range": 700,
+      "ammo": 150,
+      "ammo_pack": 75,
+      "count": 1,
+      "spread": 0.0,
+      "pierce": 1,
+      "turn_rate": 0.0,
+      "blast_radius": 0.0,
+      "fuse": 0.0,
+      "sound": "fire_w1",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    },
+    "w4": {
+      "enabled": true,
+      "name": "Missile",
+      "type": "homing",
+      "unlock_level": 3,
+      "damage": 25,
+      "speed": 420,
+      "cooldown": 0.9,
+      "range": 1400,
+      "ammo": 8,
+      "ammo_pack": 4,
+      "count": 1,
+      "spread": 0.0,
+      "pierce": 1,
+      "turn_rate": 140.0,
+      "blast_radius": 0.0,
+      "fuse": 0.0,
+      "sound": "fire_w4",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    },
+    "w5": {
+      "enabled": true,
+      "name": "Laser",
+      "type": "bolt",
+      "unlock_level": 4,
+      "damage": 15,
+      "speed": 1100,
+      "cooldown": 0.6,
+      "range": 1100,
+      "ammo": 20,
+      "ammo_pack": 10,
+      "count": 1,
+      "spread": 0.0,
+      "pierce": 4,
+      "turn_rate": 0.0,
+      "blast_radius": 0.0,
+      "fuse": 0.0,
+      "sound": "fire_w5",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    },
+    "w6": {
+      "enabled": true,
+      "name": "Mine",
+      "type": "mine",
+      "unlock_level": 5,
+      "damage": 40,
+      "speed": 0,
+      "cooldown": 1.0,
+      "range": 0,
+      "ammo": 6,
+      "ammo_pack": 3,
+      "count": 1,
+      "spread": 0.0,
+      "pierce": 1,
+      "turn_rate": 0.0,
+      "blast_radius": 130.0,
+      "fuse": 3.0,
+      "sound": "fire_w6",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    },
+    "w7": {
+      "enabled": false,
+      "name": "Custom 7",
+      "type": "bolt",
+      "unlock_level": 1,
+      "damage": 10,
+      "speed": 700,
+      "cooldown": 0.25,
+      "range": 900,
+      "ammo": -1,
+      "ammo_pack": 0,
+      "count": 1,
+      "spread": 0.0,
+      "pierce": 1,
+      "turn_rate": 0.0,
+      "blast_radius": 0.0,
+      "fuse": 0.0,
+      "sound": "fire_w1",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    },
+    "w8": {
+      "enabled": false,
+      "name": "Custom 8",
+      "type": "bolt",
+      "unlock_level": 1,
+      "damage": 10,
+      "speed": 700,
+      "cooldown": 0.25,
+      "range": 900,
+      "ammo": -1,
+      "ammo_pack": 0,
+      "count": 1,
+      "spread": 0.0,
+      "pierce": 1,
+      "turn_rate": 0.0,
+      "blast_radius": 0.0,
+      "fuse": 0.0,
+      "sound": "fire_w1",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    },
+    "w9": {
+      "enabled": false,
+      "name": "Custom 9",
+      "type": "bolt",
+      "unlock_level": 1,
+      "damage": 10,
+      "speed": 700,
+      "cooldown": 0.25,
+      "range": 900,
+      "ammo": -1,
+      "ammo_pack": 0,
+      "count": 1,
+      "spread": 0.0,
+      "pierce": 1,
+      "turn_rate": 0.0,
+      "blast_radius": 0.0,
+      "fuse": 0.0,
+      "sound": "fire_w1",
+      "graphic": "",
+      "silent": false,
+      "heal": 0
+    }
+  },
+  "aliens": {
+    "drifter": {
+      "enabled": true,
+      "health": 20,
+      "speed": 90,
+      "contact_damage": 15,
+      "score": 50,
+      "min_level": 1,
+      "wave_amp": 80.0,
+      "wave_freq": 1.2
+    },
+    "chaser": {
+      "enabled": true,
+      "health": 30,
+      "speed": 170,
+      "contact_damage": 25,
+      "score": 100,
+      "min_level": 2,
+      "turn_rate": 90.0,
+      "dies_on_ram": true
+    },
+    "sniper": {
+      "enabled": true,
+      "health": 40,
+      "speed": 120,
+      "contact_damage": 15,
+      "score": 150,
+      "min_level": 3,
+      "fire_interval": 2.2,
+      "bullet_speed": 520,
+      "bullet_damage": 15,
+      "keep_distance": 380
+    },
+    "swarm": {
+      "enabled": true,
+      "health": 15,
+      "speed": 170,
+      "contact_damage": 10,
+      "score": 60,
+      "min_level": 4,
+      "fire_interval": 3.0,
+      "bullet_speed": 400,
+      "bullet_damage": 8,
+      "orbit_radius": 220,
+      "orbit_speed": 60.0,
+      "group_size": 4
+    },
+    "seeker": {
+      "enabled": true,
+      "health": 35,
+      "speed": 150,
+      "contact_damage": 20,
+      "score": 120,
+      "min_level": 3,
+      "fire_interval": 3.0,
+      "bullet_speed": 380,
+      "bullet_damage": 10,
+      "detect_range": 900.0
+    },
+    "teleporter": {
+      "enabled": true,
+      "health": 30,
+      "speed": 80,
+      "contact_damage": 15,
+      "score": 130,
+      "min_level": 4,
+      "blink_interval": 4.0,
+      "burst_count": 3,
+      "bullet_speed": 450,
+      "bullet_damage": 10,
+      "ring": 300.0
+    },
+    "minelayer": {
+      "enabled": true,
+      "health": 50,
+      "speed": 100,
+      "contact_damage": 15,
+      "score": 140,
+      "min_level": 5,
+      "mine_interval": 2.5,
+      "mine_damage": 25,
+      "mine_blast": 100.0
+    },
+    "mothership": {
+      "enabled": true,
+      "health": 400,
+      "speed": 70,
+      "contact_damage": 30,
+      "score": 1000,
+      "min_level": 5,
+      "boss_every": 5,
+      "fire_interval": 1.6,
+      "bullet_speed": 380,
+      "bullet_damage": 12,
+      "keep_distance": 420,
+      "spawn_interval": 6.0,
+      "ring_bullets": 12
+    }
+  },
+  "audio": {
+    "music_volume": 0.5,
+    "sfx_volume": 0.7,
+    "events": {
+      "music": {
+        "file": "music.wav",
+        "volume": 1.0
+      },
+      "thrust": {
+        "file": "thrust.wav",
+        "volume": 0.5
+      },
+      "crash": {
+        "file": "crash.wav",
+        "volume": 1.0
+      },
+      "powerup": {
+        "file": "powerup.wav",
+        "volume": 1.0
+      },
+      "wormhole": {
+        "file": "wormhole.wav",
+        "volume": 1.0
+      },
+      "split": {
+        "file": "split.wav",
+        "volume": 0.8
+      },
+      "fire_w1": {
+        "file": "fire_blaster.wav",
+        "volume": 0.6
+      },
+      "fire_w2": {
+        "file": "fire_spread.wav",
+        "volume": 0.6
+      },
+      "fire_w3": {
+        "file": "fire_rapid.wav",
+        "volume": 0.5
+      },
+      "fire_w4": {
+        "file": "fire_missile.wav",
+        "volume": 0.7
+      },
+      "fire_w5": {
+        "file": "fire_laser.wav",
+        "volume": 0.6
+      },
+      "fire_w6": {
+        "file": "fire_mine.wav",
+        "volume": 0.7
+      },
+      "weapon_switch": {
+        "file": "weapon_switch.wav",
+        "volume": 0.6
+      },
+      "no_ammo": {
+        "file": "no_ammo.wav",
+        "volume": 0.6
+      },
+      "explosion": {
+        "file": "explosion.wav",
+        "volume": 1.0
+      },
+      "fire_phantom": {
+        "file": "fire_phantom.wav",
+        "volume": 0.5
+      },
+      "fire_skipper": {
+        "file": "fire_skipper.wav",
+        "volume": 0.7
+      },
+      "fire_specter": {
+        "file": "fire_specter.wav",
+        "volume": 0.6
+      },
+      "fire_bulwark": {
+        "file": "fire_bulwark.wav",
+        "volume": 0.7
+      },
+      "fire_medic": {
+        "file": "fire_medic.wav",
+        "volume": 0.5
+      },
+      "ability_cloak": {
+        "file": "ability_cloak.wav",
+        "volume": 0.7
+      },
+      "ability_hyperjump": {
+        "file": "ability_hyperjump.wav",
+        "volume": 0.8
+      },
+      "ability_hyperspace": {
+        "file": "ability_hyperspace.wav",
+        "volume": 0.8
+      },
+      "ability_deflect": {
+        "file": "ability_deflect.wav",
+        "volume": 0.7
+      },
+      "ability_repair": {
+        "file": "ability_repair.wav",
+        "volume": 0.7
+      },
+      "shield_hit": {
+        "file": "shield_hit.wav",
+        "volume": 0.7
+      },
+      "crystal": {
+        "file": "crystal.wav",
+        "volume": 0.6
+      },
+      "objective_done": {
+        "file": "objective_done.wav",
+        "volume": 0.9
+      },
+      "perk_pick": {
+        "file": "perk_pick.wav",
+        "volume": 0.8
+      },
+      "flare_warn": {
+        "file": "flare_warn.wav",
+        "volume": 0.7
+      },
+      "flare_hit": {
+        "file": "flare_hit.wav",
+        "volume": 0.9
+      },
+      "mine_blast": {
+        "file": "mine_blast.wav",
+        "volume": 0.8
+      },
+      "seeker_spawn": {
+        "file": "seeker_spawn.wav",
+        "volume": 0.6
+      },
+      "seeker_fire": {
+        "file": "seeker_fire.wav",
+        "volume": 0.5
+      },
+      "seeker_die": {
+        "file": "seeker_die.wav",
+        "volume": 0.8
+      },
+      "teleporter_spawn": {
+        "file": "teleporter_spawn.wav",
+        "volume": 0.6
+      },
+      "teleporter_blink": {
+        "file": "teleporter_blink.wav",
+        "volume": 0.6
+      },
+      "teleporter_fire": {
+        "file": "teleporter_fire.wav",
+        "volume": 0.5
+      },
+      "teleporter_die": {
+        "file": "teleporter_die.wav",
+        "volume": 0.8
+      },
+      "minelayer_spawn": {
+        "file": "minelayer_spawn.wav",
+        "volume": 0.6
+      },
+      "minelayer_drop": {
+        "file": "minelayer_drop.wav",
+        "volume": 0.5
+      },
+      "minelayer_die": {
+        "file": "minelayer_die.wav",
+        "volume": 0.8
+      },
+      "drifter_spawn": {
+        "file": "drifter_spawn.wav",
+        "volume": 0.6
+      },
+      "drifter_die": {
+        "file": "drifter_die.wav",
+        "volume": 0.8
+      },
+      "chaser_spawn": {
+        "file": "chaser_spawn.wav",
+        "volume": 0.6
+      },
+      "chaser_die": {
+        "file": "chaser_die.wav",
+        "volume": 0.8
+      },
+      "sniper_spawn": {
+        "file": "sniper_spawn.wav",
+        "volume": 0.6
+      },
+      "sniper_fire": {
+        "file": "sniper_fire.wav",
+        "volume": 0.6
+      },
+      "sniper_die": {
+        "file": "sniper_die.wav",
+        "volume": 0.8
+      },
+      "swarm_spawn": {
+        "file": "swarm_spawn.wav",
+        "volume": 0.6
+      },
+      "swarm_fire": {
+        "file": "swarm_fire.wav",
+        "volume": 0.4
+      },
+      "swarm_die": {
+        "file": "swarm_die.wav",
+        "volume": 0.7
+      },
+      "mothership_spawn": {
+        "file": "mothership_spawn.wav",
+        "volume": 1.0
+      },
+      "mothership_fire": {
+        "file": "mothership_fire.wav",
+        "volume": 0.7
+      },
+      "mothership_die": {
+        "file": "mothership_die.wav",
+        "volume": 1.0
+      }
+    }
+  }
+}

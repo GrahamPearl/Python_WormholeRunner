@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2. Memory and data - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html" aria-current="page">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>2. Memory and data</h1>
+<p class="lede">How Python stores information, and which container to choose.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>see how Python stores values in memory</li><li>use lists, dictionaries, tuples and sets</li><li>understand that two names can point to the same object</li><li>understand the difference between a copy and a reference</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>choose the right data structure for a job</li><li>draw a memory diagram for a list and a dictionary</li><li>explain what happens when two variables share one list</li></ul></div></div>
+
+<h2>Memory is a giant set of boxes</h2>
+<p>When a program runs, Python keeps its data in the computer's <strong>memory</strong> (RAM). Think of a variable as a
+<em>name tag</em> attached to a box that holds the value. If you write <code>health = 100</code>, the name <code>health</code>
+is attached to a box containing 100.</p>
+
+<figure class="diagram"><svg role="img" aria-label="A variable name pointing to a value" viewBox="0 0 640 170" xmlns="http://www.w3.org/2000/svg">
+<rect x="20" y="40" width="130" height="50" rx="8" fill="#17306b"/><text class="lt" x="85" y="70" text-anchor="middle" font-size="18">health</text>
+<line x1="150" y1="65" x2="240" y2="65" stroke="#0f7a8a" stroke-width="3"/><polygon points="240,65 228,58 228,72" fill="#0f7a8a"/>
+<rect x="240" y="40" width="110" height="50" rx="8" fill="#ffd479" stroke="#b86e00" stroke-width="2"/><text x="295" y="72" text-anchor="middle" font-size="22">100</text>
+<text x="20" y="130" font-size="15">name (variable)</text><text x="225" y="130" font-size="15">value in memory</text>
+<rect x="420" y="40" width="130" height="50" rx="8" fill="#17306b"/><text class="lt" x="485" y="70" text-anchor="middle" font-size="18">speed</text>
+<line x1="550" y1="65" x2="590" y2="65" stroke="#0f7a8a" stroke-width="3"/><polygon points="610,65 598,58 598,72" fill="#0f7a8a"/>
+<rect x="580" y="110" width="0" height="0"/><text x="440" y="130" font-size="15">another name, another box</text></svg><figcaption>A variable is a name that points to a value stored in memory.</figcaption></figure>
+
+<h2>Lists: an ordered row of boxes</h2>
+<p>A <strong>list</strong> keeps many values in order. Items have a position number called an <strong>index</strong>, starting at 0.
+The game keeps its players in a list:</p>
+<pre class="inline"><code>players = ["Pilot", "Medi"]
+print(players[0])      # Pilot  (index 0 is the first item)
+players.append("Kai")  # add to the end
+print(len(players))    # 3
+</code></pre>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 59&ndash;62</span> <a class="code-link" data-file="game/game_view.py" data-start="59" data-end="62" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-self">self</span>.local = Player(<span class="t-n">1</span>, settings.get(<span class="t-s">&quot;net.player_name&quot;</span>) <span class="t-k">or</span> <span class="t-s">&quot;Pilot&quot;</span>, local=<span class="t-k">True</span>,
+                    ship_id=profile.selected)
+<span class="t-self">self</span>.local.keys = <span class="t-self">self</span>.keys
+<span class="t-self">self</span>.players = [<span class="t-self">self</span>.local]</code></pre><p class="code-note">A list holds the local player. When a friend joins, the game uses <code>self.players.append(...)</code> to add them.</p></figure>
+<p>Arcade, the game library we use, gives us a special <code>SpriteList</code> that works like a list but is much faster to draw.
+That is why the game has <code>rock_list</code>, <code>alien_list</code> and <code>bullet_list</code>.</p>
+
+<h2>Dictionaries: look things up by name</h2>
+<p>A <strong>dictionary</strong> stores <strong>key: value</strong> pairs. Instead of remembering that "gravity" is item number 4,
+you just ask for <code>"gravity"</code>. All of the game's settings live in one big dictionary, with dictionaries inside it:</p>
+<figure class="code"><figcaption><span class="file">game/config.py</span> <span class="lines">lines 86&ndash;91</span> <a class="code-link" data-file="game/config.py" data-start="86" data-end="91" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-s">&quot;physics&quot;</span>: {
+    <span class="t-s">&quot;gravity&quot;</span>: <span class="t-n">600000.0</span>,      <span class="t-c"># pull = gravity * rock_mass / distance^2</span>
+    <span class="t-s">&quot;max_accel&quot;</span>: <span class="t-n">320.0</span>,       <span class="t-c"># cap per rock (px/s^2)</span>
+    <span class="t-s">&quot;softening&quot;</span>: <span class="t-n">50.0</span>,        <span class="t-c"># avoids infinite pull at zero distance</span>
+    <span class="t-s">&quot;drift_damping&quot;</span>: <span class="t-n">0.8</span>,     <span class="t-c"># how quickly pulled drift fades (1/s)</span>
+},</code></pre></figure>
+<p>A dictionary inside a dictionary is called <strong>nested</strong>. The class below finds a value using a dotted name such as
+<code>"physics.gravity"</code>. It splits the name at the dots and steps down one level at a time:</p>
+<figure class="code"><figcaption><span class="file">game/config.py</span> <span class="lines">lines 346&ndash;350</span> <a class="code-link" data-file="game/config.py" data-start="346" data-end="350" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> get(<span class="t-self">self</span>, dotted, default=<span class="t-k">None</span>):
+    <span class="t-k">try</span>:
+        <span class="t-k">return</span> <span class="t-self">self</span>._walk(<span class="t-self">self</span>.data, dotted)
+    <span class="t-k">except</span> (KeyError, TypeError):
+        <span class="t-k">return</span> default</code></pre></figure>
+<figure class="code"><figcaption><span class="file">game/config.py</span> <span class="lines">lines 339&ndash;344</span> <a class="code-link" data-file="game/config.py" data-start="339" data-end="344" href="https://github.com/">View on GitHub</a></figcaption><pre><code>@staticmethod
+<span class="t-k">def</span> _walk(tree, dotted):
+    node = tree
+    <span class="t-k">for</span> part <span class="t-k">in</span> dotted.split(<span class="t-s">&quot;.&quot;</span>):
+        node = node[part]
+    <span class="t-k">return</span> node</code></pre></figure>
+<figure class="diagram"><svg role="img" aria-label="Nested dictionaries holding the physics settings" viewBox="0 0 680 210" xmlns="http://www.w3.org/2000/svg">
+<rect x="10" y="10" width="190" height="190" rx="10" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/>
+<text x="105" y="34" text-anchor="middle" font-size="15" font-weight="bold">data (dictionary)</text>
+<rect x="25" y="48" width="160" height="40" rx="6" fill="#fff" stroke="#17306b"/><text x="35" y="74" font-size="14">"physics"  &#8594;</text>
+<rect x="25" y="98" width="160" height="40" rx="6" fill="#fff" stroke="#17306b"/><text x="35" y="124" font-size="14">"ship"  &#8594;</text>
+<rect x="25" y="148" width="160" height="40" rx="6" fill="#fff" stroke="#17306b"/><text x="35" y="174" font-size="14">"rocks"  &#8594;</text>
+<line x1="185" y1="68" x2="270" y2="68" stroke="#0f7a8a" stroke-width="3"/>
+<rect x="270" y="30" width="250" height="110" rx="10" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/>
+<text x="395" y="52" text-anchor="middle" font-size="15" font-weight="bold">physics (dictionary)</text>
+<text x="285" y="82" font-size="14">"gravity"  :  600000.0</text><text x="285" y="106" font-size="14">"max_accel"  :  320.0</text><text x="285" y="130" font-size="14">"softening"  :  50.0</text>
+<text x="545" y="86" font-size="14">get("physics.gravity")</text><text x="545" y="106" font-size="14">&#8594; 600000.0</text></svg><figcaption>A dictionary inside a dictionary. The dotted name steps into the inner dictionary.</figcaption></figure>
+<p>Dictionaries are also how settings are saved to a file. The text format is called <strong>JSON</strong>, and Python can turn a dictionary into JSON and back again.</p>
+
+<h2>Tuples and sets</h2>
+<ul>
+<li>A <strong>tuple</strong> is like a list that <em>cannot be changed</em> once made. It is written with round brackets. Colours are tuples:
+red, green, blue, opacity.</li>
+<li>A <strong>set</strong> holds unique items with no order and no repeats. It is perfect for "which keys are held down right now?"</li>
+</ul>
+<figure class="code"><figcaption><span class="file">game/player.py</span> <span class="lines">line 6</span> <a class="code-link" data-file="game/player.py" data-start="6" data-end="6" href="https://github.com/">View on GitHub</a></figcaption><pre><code>TINTS = {<span class="t-n">1</span>: <span class="t-k">None</span>, <span class="t-n">2</span>: (<span class="t-n">130</span>, <span class="t-n">255</span>, <span class="t-n">160</span>, <span class="t-n">255</span>)}      <span class="t-c"># player 2&#x27;s ship is tinted green</span></code></pre><p class="code-note">A dictionary whose values are tuples (or <code>None</code>). Player 2's ship is tinted green.</p></figure>
+
+<h2>Mutable or not?</h2>
+<p>Some things can be changed after they are made (<strong>mutable</strong>): lists, dictionaries, sets. Others cannot
+(<strong>immutable</strong>): numbers, strings, tuples. When you "change" a number, Python really makes a new one and moves the name tag.</p>
+
+<h2>Two names, one object: references</h2>
+<p>This idea catches out many programmers. If you write <code>b = a</code> for a list, you do <strong>not</strong> get a second list.
+You get a second <em>name tag on the same box</em>. Change the list through one name and the other name sees the change.</p>
+<figure class="diagram"><svg role="img" aria-label="Two variable names pointing at one list" viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg">
+<rect x="20" y="30" width="120" height="44" rx="8" fill="#17306b"/><text class="lt" x="80" y="58" text-anchor="middle" font-size="16">a</text>
+<rect x="20" y="110" width="120" height="44" rx="8" fill="#17306b"/><text class="lt" x="80" y="138" text-anchor="middle" font-size="16">b</text>
+<line x1="140" y1="52" x2="300" y2="85" stroke="#0f7a8a" stroke-width="3"/><line x1="140" y1="132" x2="300" y2="100" stroke="#0f7a8a" stroke-width="3"/>
+<rect x="300" y="55" width="300" height="70" rx="10" fill="#ffd479" stroke="#b86e00" stroke-width="2"/>
+<text x="450" y="82" text-anchor="middle" font-size="15" font-weight="bold">one list</text><text x="450" y="108" text-anchor="middle" font-size="16">[ 1, 2, 3 ]</text></svg><figcaption>After <code>b = a</code> both names point to the same list.</figcaption></figure>
+<p>The game uses this on purpose. The window's key-press set is <em>shared</em> with the local player, so when the window records a key,
+the player sees it straight away:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">line 61</span> <a class="code-link" data-file="game/game_view.py" data-start="61" data-end="61" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-self">self</span>.local.keys = <span class="t-self">self</span>.keys</code></pre></figure>
+<p>If you need a real, separate copy, ask for one. When an alien is created it copies its settings dictionary first, so changing one
+alien's numbers does not change the settings for all aliens:</p>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 27&ndash;28</span> <a class="code-link" data-file="game/aliens.py" data-start="27" data-end="28" href="https://github.com/">View on GitHub</a></figcaption><pre><code>cfg = dict(settings.get(<span class="t-s">f&quot;</span><span class="t-s">aliens.</span>{<span class="t-self">self</span>.kind}<span class="t-s">&quot;</span>))
+cfg.update(overrides <span class="t-k">or</span> {})</code></pre></figure>
+
+<aside class="box tryit"><h3>Try it: make a copy</h3><p>Open Python (or Thonny) and type:</p><pre class="inline"><code>a = [1, 2, 3]
+b = a
+b.append(4)
+print(a)
+c = list(a)      # a real copy
+c.append(5)
+print(a, c)</code></pre><p>Predict the output of both <code>print</code> lines before you run it.</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> Which data structure would you use to store a player's name, score and ship type together, and look each one up by name?</summary><div class="answer">A dictionary, for example <code>{"name": "Medi", "score": 120, "ship": "medic"}</code>.</div></details><details><summary><strong>2.</strong> <code>players = ["Pilot", "Medi"]</code>. What is <code>players[1]</code>?</summary><div class="answer"><code>"Medi"</code>. Indexes start at 0.</div></details><details><summary><strong>3.</strong> Why is a set a good choice for the keys that are held down?</summary><div class="answer">A key is either held or not, never twice, and order does not matter.</div></details><details><summary><strong>4.</strong> After <code>b = a</code> where <code>a</code> is a list, you add an item to <code>b</code>. Does <code>a</code> change?</summary><div class="answer">Yes. Both names point at the same list.</div></details><details><summary><strong>5.</strong> How do you make a separate copy of a dictionary?</summary><div class="answer">Use <code>dict(original)</code> or <code>original.copy()</code>.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="python-basics.html">&larr; 1. Python basics</a><a class="next" href="classes-and-objects.html">3. Classes and objects &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

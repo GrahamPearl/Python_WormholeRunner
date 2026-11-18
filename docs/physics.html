@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>6. Physics - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html" aria-current="page">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>6. Physics</h1>
+<p class="lede">Movement, gravity, wrap-around and collisions, in real code.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>use speed, time and direction to move things</li><li>understand how gravity is calculated from mass and distance</li><li>understand wrap-around using the modulo operator</li><li>check for collisions using distance</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>explain <code>x = x + v * dt</code></li><li>say what happens to gravity when the distance doubles</li><li>explain why the game uses <code>%</code> for wrap-around</li><li>describe how two circles are tested for a collision</li></ul></div></div>
+
+<h2>1. Movement: position, speed and time</h2>
+<p>Speed tells us how far something moves in one second. In one frame it moves <code>speed &times; dt</code>. The new position is the old position plus that move.
+This is the same idea as <em>distance = speed &times; time</em> from science class.</p>
+
+<h2>2. Direction: sine and cosine</h2>
+<p>The ship has a <strong>bearing</strong>: the direction it faces, in degrees clockwise from straight up (like a compass). To move forward we need how far to go
+<em>across</em> (<code>dx</code>) and <em>up</em> (<code>dy</code>). Trigonometry gives us the answer:</p>
+<figure class="diagram"><svg role="img" aria-label="Diagram of a bearing with sine and cosine" viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar2" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#d6452e"/></marker></defs>
+<line x1="60" y1="220" x2="60" y2="20" stroke="#55607a" stroke-width="2"/><text x="68" y="30" font-size="13">up (0&#176;)</text>
+<line x1="60" y1="220" x2="300" y2="220" stroke="#55607a" stroke-width="2"/>
+<line x1="60" y1="220" x2="200" y2="80" stroke="#d6452e" stroke-width="4" marker-end="url(#ar2)"/>
+<line x1="200" y1="80" x2="200" y2="220" stroke="#0f7a8a" stroke-width="2" stroke-dasharray="6"/><line x1="60" y1="80" x2="200" y2="80" stroke="#0f7a8a" stroke-width="2" stroke-dasharray="6"/>
+<path d="M60 160 A60 60 0 0 1 102 178" fill="none" stroke="#b86e00" stroke-width="3"/><text x="105" y="165" font-size="14">bearing</text>
+<text x="120" y="240" font-size="14">dx = sin(bearing)</text><text x="208" y="155" font-size="14">dy = cos(bearing)</text>
+<text x="310" y="90" font-size="14">The ship faces this way.</text><text x="310" y="112" font-size="14">Moving 1 step forward moves it</text><text x="310" y="132" font-size="14">dx across and dy up.</text></svg><figcaption>A bearing split into sideways and upward parts.</figcaption></figure>
+<p>Python's <code>math.sin</code> and <code>math.cos</code> want angles in <strong>radians</strong>, so the code first converts with <code>math.radians</code>. Here is the part of the ship's update
+that does the maths:</p>
+<figure class="code"><figcaption><span class="file">game/sprites.py</span> <span class="lines">lines 119&ndash;156</span> <a class="code-link" data-file="game/sprites.py" data-start="119" data-end="156" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> update_ship(<span class="t-self">self</span>, dt, up, down, left, right, ax, ay, world):
+    cfg = settings.get
+    <span class="t-self">self</span>.bearing, <span class="t-self">self</span>.speed = control_step(<span class="t-self">self</span>.bearing, <span class="t-self">self</span>.speed, dt, up, down,
+                                            left, right, <span class="t-self">self</span>.boost_timer &gt; <span class="t-n">0</span>, <span class="t-self">self</span>.mults)
+
+    <span class="t-c"># Gravity changes the drift velocity, which slowly damps away.</span>
+    <span class="t-self">self</span>.drift_x += ax * dt
+    <span class="t-self">self</span>.drift_y += ay * dt
+    damp = max(<span class="t-n">0.0</span>, <span class="t-n">1.0</span> - cfg(<span class="t-s">&quot;physics.drift_damping&quot;</span>) * dt)
+    <span class="t-self">self</span>.drift_x *= damp
+    <span class="t-self">self</span>.drift_y *= damp
+
+    rad = math.radians(<span class="t-self">self</span>.bearing)
+    <span class="t-self">self</span>.center_x += (math.sin(rad) * <span class="t-self">self</span>.speed + <span class="t-self">self</span>.drift_x) * dt
+    <span class="t-self">self</span>.center_y += (math.cos(rad) * <span class="t-self">self</span>.speed + <span class="t-self">self</span>.drift_y) * dt
+
+    world.wrap(<span class="t-self">self</span>)
+
+    <span class="t-self">self</span>.angle = ANGLE_SIGN * <span class="t-self">self</span>.bearing
+    <span class="t-self">self</span>.grace_timer = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.grace_timer - dt)
+    <span class="t-self">self</span>.shield_timer = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.shield_timer - dt)
+    <span class="t-self">self</span>.boost_timer = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.boost_timer - dt)
+    <span class="t-self">self</span>.active = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.active - dt)
+    <span class="t-self">self</span>.since_hit += dt
+    <span class="t-k">if</span> <span class="t-k">not</span> <span class="t-self">self</span>.jammed:                       <span class="t-c"># ion storms stop all recharging</span>
+        <span class="t-self">self</span>.ability_cd = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.ability_cd - dt)
+        <span class="t-self">self</span>.shield_wait = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.shield_wait - dt)
+        <span class="t-k">if</span> <span class="t-self">self</span>.shield_max &gt; <span class="t-n">0</span> <span class="t-k">and</span> <span class="t-self">self</span>.shield_wait &lt;= <span class="t-n">0</span>:
+            <span class="t-self">self</span>.shield_hp = min(<span class="t-self">self</span>.shield_max, <span class="t-self">self</span>.shield_hp + <span class="t-self">self</span>.shield_rate * dt)
+        <span class="t-k">if</span> <span class="t-self">self</span>.regen &gt; <span class="t-n">0</span> <span class="t-k">and</span> <span class="t-self">self</span>.since_hit &gt;= <span class="t-self">self</span>.regen_delay:
+            <span class="t-self">self</span>.health = min(<span class="t-self">self</span>.max_health, <span class="t-self">self</span>.health + <span class="t-self">self</span>.regen * dt)
+    blink = <span class="t-self">self</span>.grace_timer &gt; <span class="t-n">0</span> <span class="t-k">and</span> int(<span class="t-self">self</span>.grace_timer * <span class="t-n">12</span>) % <span class="t-n">2</span> == <span class="t-n">0</span>
+    <span class="t-self">self</span>.alpha = <span class="t-n">110</span> <span class="t-k">if</span> blink <span class="t-k">else</span> <span class="t-n">255</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.cloaked:
+        <span class="t-self">self</span>.alpha = <span class="t-n">100</span>
+    <span class="t-k">elif</span> <span class="t-self">self</span>.phased:
+        <span class="t-self">self</span>.alpha = <span class="t-n">70</span>
+    <span class="t-self">self</span>.animate(dt)</code></pre><p class="code-note">Find <code>math.sin(rad)</code> and <code>math.cos(rad)</code>. Then find where the gravity drift is added, and where <code>world.wrap(self)</code> keeps the ship on the map.</p></figure>
+
+<h2>3. Gravity</h2>
+<p>Isaac Newton found that the pull between two objects gets stronger with <strong>mass</strong> and weaker with <strong>distance</strong>. It gets weaker very quickly, with the <em>square</em> of the distance:</p>
+<p style="text-align:center;font-size:1.3rem"><strong>pull = G &times; mass &divide; distance&#178;</strong></p>
+<p>Double the distance and the pull is four times weaker. In the game, <code>G</code> is the setting <code>gravity</code>. Two safety tricks stop the pull from becoming silly:
+a <strong>softening</strong> number added to the distance (so a ship right on top of a rock is not pulled with infinite force) and a <strong>cap</strong> (a maximum).</p>
+<figure class="code"><figcaption><span class="file">game/physics.py</span> <span class="lines">lines 5&ndash;13</span> <a class="code-link" data-file="game/physics.py" data-start="5" data-end="13" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> gravity_accel(dx, dy, mass, strength, softening, max_accel):
+    <span class="t-s">&quot;&quot;&quot;Acceleration toward a rock that is (dx, dy) away (use World.delta for wrap-around).
+
+    Newtonian-style: grows with the rock&#x27;s mass, falls with distance squared.
+    &quot;&quot;&quot;</span>
+    dist_sq = dx * dx + dy * dy + softening * softening
+    dist = math.sqrt(dist_sq)
+    accel = min(strength * mass / dist_sq, max_accel)
+    <span class="t-k">return</span> accel * dx / dist, accel * dy / dist</code></pre></figure>
+<figure class="diagram"><svg role="img" aria-label="Graph of gravity pull against distance for three rock sizes" viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg"><line x1="60" y1="260" x2="630" y2="260" stroke="#55607a" stroke-width="2"/><line x1="60" y1="260" x2="60" y2="10" stroke="#55607a" stroke-width="2"/><text x="60" y="282" text-anchor="middle" font-size="12">0</text><text x="153" y="282" text-anchor="middle" font-size="12">100</text><text x="247" y="282" text-anchor="middle" font-size="12">200</text><text x="340" y="282" text-anchor="middle" font-size="12">300</text><text x="433" y="282" text-anchor="middle" font-size="12">400</text><text x="527" y="282" text-anchor="middle" font-size="12">500</text><text x="620" y="282" text-anchor="middle" font-size="12">600</text><text x="52" y="264" text-anchor="end" font-size="12">0</text><text x="52" y="193" text-anchor="end" font-size="12">100</text><text x="52" y="123" text-anchor="end" font-size="12">200</text><text x="52" y="52" text-anchor="end" font-size="12">300</text><polyline points="60.0,34.1 69.3,34.1 78.7,34.1 88.0,34.1 97.3,34.1 106.7,43.2 116.0,82.3 125.3,113.5 134.7,138.2 144.0,157.7 153.3,173.3 162.7,185.7 172.0,195.8 181.3,204.1 190.7,210.9 200.0,216.6 209.3,221.4 218.7,225.5 228.0,228.9 237.3,231.9 246.7,234.5 256.0,236.7 265.3,238.7 274.7,240.4 284.0,242.0 293.3,243.3 302.7,244.5 312.0,245.6 321.3,246.6 330.7,247.5 340.0,248.3 349.3,249.0 358.7,249.7 368.0,250.3 377.3,250.8 386.7,251.3 396.0,251.8 405.3,252.2 414.7,252.6 424.0,253.0 433.3,253.3 442.7,253.6 452.0,253.9 461.3,254.2 470.7,254.5 480.0,254.7 489.3,254.9 498.7,255.1 508.0,255.3 517.3,255.5 526.7,255.7 536.0,255.9 545.3,256.0 554.7,256.2 564.0,256.3 573.3,256.4 582.7,256.6 592.0,256.7 601.3,256.8 610.7,256.9 620.0,257.0" fill="none" stroke="#d6452e" stroke-width="3"/><polyline points="60.0,90.6 69.3,97.1 78.7,114.0 88.0,135.4 97.3,156.7 106.7,175.3 116.0,190.6 125.3,202.8 134.7,212.4 144.0,220.0 153.3,226.1 162.7,231.0 172.0,234.9 181.3,238.2 190.7,240.8 200.0,243.1 209.3,244.9 218.7,246.5 228.0,247.9 237.3,249.0 246.7,250.0 256.0,250.9 265.3,251.7 274.7,252.4 284.0,253.0 293.3,253.5 302.7,254.0 312.0,254.4 321.3,254.8 330.7,255.1 340.0,255.4 349.3,255.7 358.7,256.0 368.0,256.2 377.3,256.4 386.7,256.6 396.0,256.8 405.3,257.0 414.7,257.1 424.0,257.3 433.3,257.4 442.7,257.5 452.0,257.6 461.3,257.7 470.7,257.8 480.0,257.9 489.3,258.0 498.7,258.1 508.0,258.2 517.3,258.3 526.7,258.3 536.0,258.4 545.3,258.4 554.7,258.5 564.0,258.6 573.3,258.6 582.7,258.7 592.0,258.7 601.3,258.8 610.7,258.8 620.0,258.8" fill="none" stroke="#b86e00" stroke-width="3"/><polyline points="60.0,199.0 69.3,201.4 78.7,207.4 88.0,215.2 97.3,222.8 106.7,229.5 116.0,235.0 125.3,239.4 134.7,242.9 144.0,245.6 153.3,247.8 162.7,249.6 172.0,251.0 181.3,252.1 190.7,253.1 200.0,253.9 209.3,254.6 218.7,255.1 228.0,255.6 237.3,256.0 246.7,256.4 256.0,256.7 265.3,257.0 274.7,257.2 284.0,257.5 293.3,257.7 302.7,257.8 312.0,258.0 321.3,258.1 330.7,258.2 340.0,258.4 349.3,258.5 358.7,258.5 368.0,258.6 377.3,258.7 386.7,258.8 396.0,258.8 405.3,258.9 414.7,259.0 424.0,259.0 433.3,259.1 442.7,259.1 452.0,259.1 461.3,259.2 470.7,259.2 480.0,259.3 489.3,259.3 498.7,259.3 508.0,259.3 517.3,259.4 526.7,259.4 536.0,259.4 545.3,259.4 554.7,259.5 564.0,259.5 573.3,259.5 582.7,259.5 592.0,259.5 601.3,259.6 610.7,259.6 620.0,259.6" fill="none" stroke="#2c9a52" stroke-width="3"/><rect x="360" y="30" width="14" height="14" fill="#d6452e"/><text x="380" y="42" font-size="13">big rock (mass 2.56)</text><rect x="360" y="52" width="14" height="14" fill="#b86e00"/><text x="380" y="64" font-size="13">medium rock (mass 1)</text><rect x="360" y="74" width="14" height="14" fill="#2c9a52"/><text x="380" y="86" font-size="13">small rock (mass 0.36)</text><text x="350.0" y="298" text-anchor="middle" font-size="13">distance from the rock (pixels)</text><text x="14" y="150.0" font-size="13" transform="rotate(-90 14 150.0)" text-anchor="middle">pull (pixels/second&#178;)</text></svg><figcaption>Pull from the game's real settings. Bigger rocks pull harder, and every curve drops quickly as you move away.</figcaption></figure>
+<p>The ship's pull is the <em>sum</em> of the pull from every rock. Remember the loop on the Python basics page? This is where it is used:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 525&ndash;535</span> <a class="code-link" data-file="game/game_view.py" data-start="525" data-end="535" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _gravity_on(<span class="t-self">self</span>, ship):
+    g = settings.get(<span class="t-s">&quot;physics.gravity&quot;</span>) * <span class="t-self">self</span>._gravity_factor()
+    soft = settings.get(<span class="t-s">&quot;physics.softening&quot;</span>)
+    cap = settings.get(<span class="t-s">&quot;physics.max_accel&quot;</span>)
+    ax = ay = <span class="t-n">0.0</span>
+    <span class="t-k">for</span> rock <span class="t-k">in</span> <span class="t-self">self</span>.rock_list:
+        dx, dy = <span class="t-self">self</span>.world.delta(ship.center_x, ship.center_y, rock.center_x, rock.center_y)
+        dax, day = gravity_accel(dx, dy, rock.mass, g, soft, cap)
+        ax += dax
+        ay += day
+    <span class="t-k">return</span> ax, ay</code></pre></figure>
+<p>The result changes the ship's <strong>drift</strong>, an extra velocity added on top of its steering. To stop the drift growing forever, a little of it is removed each frame, like friction:</p>
+<figure class="code"><figcaption><span class="file">game/sprites.py</span> <span class="lines">lines 124&ndash;129</span> <a class="code-link" data-file="game/sprites.py" data-start="124" data-end="129" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-c"># Gravity changes the drift velocity, which slowly damps away.</span>
+<span class="t-self">self</span>.drift_x += ax * dt
+<span class="t-self">self</span>.drift_y += ay * dt
+damp = max(<span class="t-n">0.0</span>, <span class="t-n">1.0</span> - cfg(<span class="t-s">&quot;physics.drift_damping&quot;</span>) * dt)
+<span class="t-self">self</span>.drift_x *= damp
+<span class="t-self">self</span>.drift_y *= damp</code></pre><p class="code-note">Multiplying by a number just below 1 each frame makes a value fade away smoothly.</p></figure>
+
+<h2>4. Wrap-around: the modulo operator</h2>
+<p>The map has no walls. Fly off the right side and you appear on the left. The trick is the <strong>modulo</strong> operator <code>%</code>, which gives the <em>remainder</em> after division.
+If the world is 1280 wide, then <code>1290 % 1280</code> is <code>10</code>. The position wraps back to the start.</p>
+<figure class="code"><figcaption><span class="file">game/world.py</span> <span class="lines">lines 14&ndash;16</span> <a class="code-link" data-file="game/world.py" data-start="14" data-end="16" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> wrap(<span class="t-self">self</span>, sprite):
+    sprite.center_x = sprite.center_x % <span class="t-self">self</span>.width
+    sprite.center_y = sprite.center_y % <span class="t-self">self</span>.height</code></pre></figure>
+<p>Wrapping creates a new problem. A ship at the far right and a rock at the far left are <em>really</em> close together, even though their numbers are far apart.
+The <code>delta</code> method finds the <strong>shortest</strong> way, even if it goes across the edge:</p>
+<figure class="diagram"><svg role="img" aria-label="Ship and rock on opposite edges that are really close" viewBox="0 0 640 170" xmlns="http://www.w3.org/2000/svg">
+<rect x="40" y="30" width="560" height="100" fill="#e6f0ff" stroke="#17306b" stroke-width="3"/>
+<circle cx="585" cy="80" r="14" fill="#d6452e"/><text x="585" y="115" text-anchor="middle" font-size="12">ship at x = 1265</text>
+<circle cx="62" cy="80" r="14" fill="#2c9a52"/><text x="62" y="115" text-anchor="middle" font-size="12">rock at x = 15</text>
+<path d="M600 60 Q 640 20 20 20" fill="none" stroke="#0f7a8a" stroke-width="3" stroke-dasharray="7"/>
+<text x="320" y="16" text-anchor="middle" font-size="13">shortest way: only 30 pixels, across the edge</text>
+<text x="320" y="152" text-anchor="middle" font-size="13">the long way across the screen: 1250 pixels</text></svg><figcaption>On a wrapped map, the shortest path can cross the edge.</figcaption></figure>
+<figure class="code"><figcaption><span class="file">game/world.py</span> <span class="lines">lines 18&ndash;26</span> <a class="code-link" data-file="game/world.py" data-start="18" data-end="26" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> delta(<span class="t-self">self</span>, ax, ay, bx, by):
+    <span class="t-s">&quot;&quot;&quot;Shortest vector from a to b on the wrapped world.&quot;&quot;&quot;</span>
+    dx = (bx - ax) % <span class="t-self">self</span>.width
+    dy = (by - ay) % <span class="t-self">self</span>.height
+    <span class="t-k">if</span> dx &gt; <span class="t-self">self</span>.width / <span class="t-n">2</span>:
+        dx -= <span class="t-self">self</span>.width
+    <span class="t-k">if</span> dy &gt; <span class="t-self">self</span>.height / <span class="t-n">2</span>:
+        dy -= <span class="t-self">self</span>.height
+    <span class="t-k">return</span> dx, dy</code></pre></figure>
+<p>If the gap is more than half the world, going the other way is shorter, so it takes away one world width. Every collision, every pull and every alien chase uses <code>delta</code>.</p>
+
+<h2>5. Collisions: circles and Pythagoras</h2>
+<p>The game treats most things as circles. Two circles touch when the distance between their centres is less than the two radii added together. The distance comes from <strong>Pythagoras' theorem</strong>
+(<code>math.hypot</code> does it in one go):</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 634&ndash;636</span> <a class="code-link" data-file="game/game_view.py" data-start="634" data-end="636" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _overlap(<span class="t-self">self</span>, a, b):
+    dx, dy = <span class="t-self">self</span>.world.delta(a.center_x, a.center_y, b.center_x, b.center_y)
+    <span class="t-k">return</span> math.hypot(dx, dy) &lt; a.hit_radius + b.hit_radius</code></pre></figure>
+<p>When two rocks collide and "split when rocks collide" is off, they bounce. The bounce uses <strong>mass</strong>: a heavy rock changes a light rock's direction more than the other way round.</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 648&ndash;667</span> <a class="code-link" data-file="game/game_view.py" data-start="648" data-end="667" href="https://github.com/">View on GitHub</a></figcaption><pre><code>dx, dy = <span class="t-self">self</span>.world.delta(a.center_x, a.center_y, b.center_x, b.center_y)
+dist = math.hypot(dx, dy)
+<span class="t-k">if</span> dist == <span class="t-n">0</span> <span class="t-k">or</span> dist &gt;= a.hit_radius + b.hit_radius:
+    <span class="t-k">continue</span>
+nx, ny = dx / dist, dy / dist
+rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny
+<span class="t-k">if</span> rel &gt;= <span class="t-n">0</span>:          <span class="t-c"># already moving apart</span>
+    <span class="t-k">continue</span>
+<span class="t-k">if</span> split_mode:
+    <span class="t-k">if</span> a.cooldown &gt; <span class="t-n">0</span> <span class="t-k">or</span> b.cooldown &gt; <span class="t-n">0</span>:
+        <span class="t-k">continue</span>
+    dead.update((id(a), id(b)))
+    <span class="t-self">self</span>._break_rock(a)
+    <span class="t-self">self</span>._break_rock(b)
+    <span class="t-k">break</span>
+impulse = <span class="t-n">2</span> * rel / (a.mass + b.mass)       <span class="t-c"># elastic bounce</span>
+a.vx += impulse * b.mass * nx
+a.vy += impulse * b.mass * ny
+b.vx -= impulse * a.mass * nx
+b.vy -= impulse * a.mass * ny</code></pre><p class="code-note"><code>(nx, ny)</code> is the direction from one rock to the other. <code>rel</code> says whether they are moving together. The last lines share the push according to mass.</p></figure>
+
+<h2>6. Steering a missile</h2>
+<p>The homing missile turns toward its target, but only a little each frame, so it curves. The clever line is the one that finds the <em>shortest turn</em> (left or right) between two angles:</p>
+<figure class="code"><figcaption><span class="file">game/weapons.py</span> <span class="lines">lines 50&ndash;56</span> <a class="code-link" data-file="game/weapons.py" data-start="50" data-end="56" href="https://github.com/">View on GitHub</a></figcaption><pre><code>speed = math.hypot(<span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy) <span class="t-k">or</span> <span class="t-n">1.0</span>
+heading = math.atan2(<span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy)
+wanted = math.atan2(best[<span class="t-n">0</span>], best[<span class="t-n">1</span>])
+diff = (wanted - heading + math.pi) % (<span class="t-n">2</span> * math.pi) - math.pi
+limit = math.radians(<span class="t-self">self</span>.turn_rate) * dt
+heading += max(-limit, min(limit, diff))
+<span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy = math.sin(heading) * speed, math.cos(heading) * speed</code></pre></figure>
+<p><code>(wanted - heading + &pi;) % (2&pi;) - &pi;</code> always gives an answer between &minus;180&deg; and +180&deg;. Positive means turn one way, negative the other.</p>
+
+<aside class="box tryit"><h3>Try it: test the physics</h3><ol><li>In the Game Editor, set <em>Gravity strength</em> to 0. Fly close to a rock. What changes?</li>
+<li>Set <em>Drift damping</em> to 0. What happens after you are pulled by a rock? Why?</li>
+<li>Fly off the right edge. Where do you come out? Which function made that happen?</li></ol></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> A ship moves at 300 pixels per second. How far does it move in one frame at 60 frames per second?</summary><div class="answer">300 &divide; 60 = 5 pixels.</div></details><details><summary><strong>2.</strong> A rock pulls with strength 80 at 100 pixels. How strong is the pull at 200 pixels?</summary><div class="answer">Double the distance gives one quarter of the pull: 20.</div></details><details><summary><strong>3.</strong> What is <code>1290 % 1280</code>?</summary><div class="answer">10.</div></details><details><summary><strong>4.</strong> Why is <code>World.delta</code> needed as well as <code>World.wrap</code>?</summary><div class="answer">Wrap moves things back onto the map. Delta works out the true shortest distance between two things, even across the edge.</div></details><details><summary><strong>5.</strong> Two circles have radii 20 and 30. The centres are 45 apart. Do they touch?</summary><div class="answer">Yes: 20 + 30 = 50, and 45 is less than 50.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="game-loop.html">&larr; 5. The game loop</a><a class="next" href="levels-and-world.html">7. Levels and the world &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

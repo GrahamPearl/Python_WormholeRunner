@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12. Web development - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html" aria-current="page">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>12. Web development</h1>
+<p class="lede">How websites work, using the one you are reading.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>see that a website is made from HTML, CSS and JavaScript</li><li>read real HTML, CSS and JavaScript from this site</li><li>see how Python can <em>write</em> web pages</li><li>follow a simple design process for a digital outcome</li><li>publish a static website</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>name the job of HTML, CSS and JavaScript</li><li>make a small web page with headings, links, a list and a table</li><li>explain what makes a page accessible</li><li>describe how I would test and improve my page</li></ul></div></div>
+
+<h2>You are reading a web project</h2>
+<p>This learning site is a <strong>static website</strong>: a folder of files that a browser just opens. No database and no server program. That makes it easy to host for free on GitHub Pages.
+A website is built from three languages that work as a team:</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Language</th><th scope="col">Job</th><th scope="col">Like a&hellip;</th></tr></thead><tbody><tr><td><strong>HTML</strong></td><td>the structure and the content: headings, paragraphs, links, tables</td><td>the skeleton and the words of a magazine page</td></tr><tr><td><strong>CSS</strong></td><td>the look: colours, fonts, spacing, layout</td><td>the design and the paint</td></tr><tr><td><strong>JavaScript</strong></td><td>the behaviour: buttons that do things</td><td>the electricity that makes things move</td></tr></tbody></table></div>
+
+<h2>HTML: structure</h2>
+<p>HTML is written with <strong>tags</strong> in angle brackets, such as <code>&lt;h1&gt;</code>. Most tags come in pairs. Tags can have <strong>attributes</strong>, such as <code>href</code> on a link.
+Here is the top part of this site's first page:</p>
+<figure class="code"><figcaption><span class="file">docs/index.html</span> <span class="lines">lines 1&ndash;10</span> <a class="code-link" data-file="docs/index.html" data-start="1" data-end="10" href="https://github.com/">View on GitHub</a></figcaption><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=<span class="t-s">&quot;en-NZ&quot;</span>&gt;
+&lt;head&gt;
+&lt;meta charset=<span class="t-s">&quot;utf-8&quot;</span>&gt;
+&lt;meta name=<span class="t-s">&quot;viewport&quot;</span> content=<span class="t-s">&quot;width=device-width, initial-scale=1&quot;</span>&gt;
+&lt;title&gt;Wormhole Runner: learn Python by exploring a game - Wormhole Runner: learn Python by exploring a game&lt;/title&gt;
+&lt;link rel=<span class="t-s">&quot;stylesheet&quot;</span> href=<span class="t-s">&quot;assets/style.css&quot;</span>&gt;
+&lt;script src=<span class="t-s">&quot;site-config.js&quot;</span> defer&gt;&lt;/script&gt;
+&lt;script src=<span class="t-s">&quot;assets/app.js&quot;</span> defer&gt;&lt;/script&gt;
+&lt;/head&gt;</code></pre></figure>
+<ul>
+<li><code>&lt;meta name="viewport"&gt;</code> makes the page fit a phone screen.</li>
+<li><code>&lt;link rel="stylesheet"&gt;</code> loads the CSS file. <code>&lt;script&gt;</code> loads JavaScript.</li>
+<li><code>lang="en-NZ"</code> tells screen readers which language to use.</li>
+</ul>
+<p>Good HTML uses <strong>semantic</strong> tags that say what each part <em>is</em>: <code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>, <code>&lt;h1&gt;</code>&ndash;<code>&lt;h6&gt;</code>, <code>&lt;ul&gt;</code>, <code>&lt;table&gt;</code>.
+Screen readers and search engines rely on them.</p>
+<h3>Links: relative and absolute</h3>
+<p>A link such as <code>href="physics.html"</code> is <strong>relative</strong>: it means "the file called physics.html in the same folder". Relative links keep working when the whole site is moved to a different address. A link such as
+<code>https://github.com/...</code> is <strong>absolute</strong>.</p>
+
+<h2>CSS: style</h2>
+<p>CSS is a list of <strong>rules</strong>. Each rule has a <strong>selector</strong> (what to style) and <strong>properties</strong> (how). Here are the real rules for the coloured boxes on these pages:</p>
+<figure class="code"><figcaption><span class="file">docs/assets/style.css</span> <span class="lines">lines 38&ndash;45</span> <a class="code-link" data-file="docs/assets/style.css" data-start="38" data-end="45" href="https://github.com/">View on GitHub</a></figcaption><pre><code>/* start:boxes */
+.box { border-radius: <span class="t-n">10</span>px; padding: <span class="t-n">12</span>px <span class="t-n">18</span>px; margin: <span class="t-n">18</span>px <span class="t-n">0</span>; border-left: <span class="t-n">6</span>px solid var(--accent); background: var(--tip); }
+.box h3 { margin: <span class="t-n">.2</span>em <span class="t-n">0</span>; font-size: <span class="t-n">1.05</span>rem; }
+.box ul { margin: <span class="t-n">.3</span>em <span class="t-n">0</span>; padding-left: <span class="t-n">1.2</span>em; }
+.box.learn { background: var(--learn); } .box.success { background: var(--success); border-color: <span class="t-c">#2c9a52; }</span>
+.box.tryit { background: var(--<span class="t-k">try</span>); border-color: <span class="t-c">#7a4fd6; } .box.warn { background: var(--warn); border-color: #d6452e; }</span>
+.goals { display: grid; grid-template-columns: <span class="t-n">1</span>fr <span class="t-n">1</span>fr; gap: <span class="t-n">0</span> <span class="t-n">16</span>px; }
+/* end:boxes */</code></pre></figure>
+<p>The <code>:root</code> block at the top of the file defines <strong>variables</strong> such as <code>--learn</code>, so colours can be changed in one place. The file also has a rule that swaps to dark colours if the person's device is set to dark mode.
+And a <strong>media query</strong> that rearranges the page on a narrow phone screen. This is called <strong>responsive design</strong>.</p>
+<figure class="code"><figcaption><span class="file">docs/assets/style.css</span> <span class="lines">lines 71&ndash;75</span> <a class="code-link" data-file="docs/assets/style.css" data-start="71" data-end="75" href="https://github.com/">View on GitHub</a></figcaption><pre><code>/* start:buttons */
+.copy { position: absolute; right: <span class="t-n">8</span>px; top: <span class="t-n">14</span>px; font: inherit; font-size: <span class="t-n">.8</span>rem; padding: <span class="t-n">3</span>px <span class="t-n">10</span>px; border-radius: <span class="t-n">6</span>px;
+        border: <span class="t-n">1</span>px solid <span class="t-c">#9fe4ff; background: #1d2a57; color: #fff; cursor: pointer; }</span>
+.copy:hover, .copy:focus-visible { background: <span class="t-c">#0f7a8a; }</span>
+/* end:buttons */</code></pre></figure>
+
+<h2>JavaScript: behaviour</h2>
+<p>JavaScript runs in the browser. This site uses a few lines to set the GitHub links. Compare it with the Python you have learned. The ideas (variables, <code>if</code>, loops, functions) are the same, only the spelling changes.</p>
+<figure class="code"><figcaption><span class="file">docs/assets/app.js</span> <span class="lines">lines 7&ndash;22</span> <a class="code-link" data-file="docs/assets/app.js" data-start="7" data-end="22" href="https://github.com/">View on GitHub</a></figcaption><pre><code>function fixLinks() {
+  document.querySelectorAll(<span class="t-s">&quot;a.code-link&quot;</span>).forEach(function (a) {
+    var url = repoBase() + a.dataset.file;
+    <span class="t-k">if</span> (a.dataset.start) url += <span class="t-s">&quot;#L&quot;</span> + a.dataset.start + (a.dataset.end &amp;&amp; a.dataset.end !== a.dataset.start ? <span class="t-s">&quot;-L&quot;</span> + a.dataset.end : <span class="t-s">&quot;&quot;</span>);
+    a.href = url; a.target = <span class="t-s">&quot;_blank&quot;</span>; a.rel = <span class="t-s">&quot;noopener&quot;</span>;
+  });
+  <span class="t-k">if</span> (S.user === <span class="t-s">&quot;YOUR-USER&quot;</span>) {
+    var main = document.querySelector(<span class="t-s">&quot;main&quot;</span>);
+    <span class="t-k">if</span> (main &amp;&amp; /index\.html$|\/$/.test(location.pathname)) {
+      var n = document.createElement(&quot;aside&quot;); n.className = &quot;box warn&quot;;
+      n.innerHTML = &quot;&lt;h3&gt;Teacher: one quick set-up step&lt;/h3&gt;&lt;p&gt;The code links still point to &lt;code&gt;YOUR-USER&lt;/code&gt;. &quot; +
+        &quot;Open &lt;code&gt;docs/site-config.js&lt;/code&gt; and type your GitHub user name and repository name. That&#x27;s all.&lt;/p&gt;&quot;;
+      main.insertBefore(n, main.children[1]);
+    }
+  }
+}</code></pre></figure>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Idea</th><th scope="col">Python</th><th scope="col">JavaScript</th></tr></thead><tbody><tr><td>variable</td><td><code>score = 10</code></td><td><code>let score = 10;</code></td></tr><tr><td>decision</td><td><code>if x &gt; 5:</code></td><td><code>if (x &gt; 5) { ... }</code></td></tr><tr><td>loop</td><td><code>for item in items:</code></td><td><code>for (const item of items) { ... }</code></td></tr><tr><td>function</td><td><code>def hit(d):</code></td><td><code>function hit(d) { ... }</code></td></tr><tr><td>list</td><td><code>[1, 2, 3]</code></td><td><code>[1, 2, 3]</code></td></tr><tr><td>dictionary</td><td><code>{"a": 1}</code></td><td><code>{ a: 1 }</code> (an object)</td></tr></tbody></table></div>
+
+<h2>Python writes this website</h2>
+<p>These pages were not typed by hand. A Python program in <code>tools/build_docs.py</code> builds them. It reads the game's real source code, cuts out the snippets, makes the tables from the game's settings
+and writes out the HTML files. That is why the code in the boxes always matches the game. Here is a small function from that program. It turns a list of questions into HTML using a <code>for</code> loop and an f-string:</p>
+<figure class="code"><figcaption><span class="file">tools/docs/lib.py</span> <span class="lines">lines 166&ndash;171</span> <a class="code-link" data-file="tools/docs/lib.py" data-start="166" data-end="171" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> quiz(items):
+    out = [<span class="t-s">&#x27;&lt;section class=&quot;check&quot;&gt;&lt;h2&gt;Check your understanding&lt;/h2&gt;&#x27;</span>]
+    <span class="t-k">for</span> i, (q, a) <span class="t-k">in</span> enumerate(items, <span class="t-n">1</span>):
+        out.append(<span class="t-s">f&#x27;</span><span class="t-s">&lt;details&gt;&lt;summary&gt;&lt;strong&gt;</span>{i}<span class="t-s">.&lt;/strong&gt; </span>{q}<span class="t-s">&lt;/summary&gt;&lt;div class=&quot;answer&quot;&gt;</span>{a}<span class="t-s">&lt;/div&gt;&lt;/details&gt;</span><span class="t-s">&#x27;</span>)
+    out.append(<span class="t-s">&quot;&lt;/section&gt;&quot;</span>)
+    <span class="t-k">return</span> <span class="t-s">&quot;&quot;</span>.join(out)</code></pre></figure>
+<p>Programs that write other programs or pages are everywhere. This is how many websites are made.</p>
+
+<h2>A design process for a digital outcome</h2>
+<p>When you make a website or any digital outcome, follow these steps. You will often go back to an earlier step. That is normal and is called <strong>iteration</strong>.</p>
+<ol>
+<li><strong>Understand the need.</strong> Who is it for? What do they want to do?</li>
+<li><strong>Plan.</strong> Sketch the pages on paper. List the content.</li>
+<li><strong>Build.</strong> Write HTML first, then CSS, then JavaScript.</li>
+<li><strong>Test.</strong> Try it on a phone and a laptop. Ask someone else to use it.</li>
+<li><strong>Improve.</strong> Fix problems. Then evaluate: did it meet the need?</li>
+</ol>
+<aside class="box tip"><h3>Accessible and inclusive</h3><ul><li>Give every picture a short description in <code>alt="..."</code>.</li><li>Use headings in order (one <code>h1</code>, then <code>h2</code>, and so on).</li><li>Make sure text has strong contrast with its background.</li><li>Do not rely on colour alone to give meaning.</li><li>Make sure everything works with the keyboard.</li><li>Use plain language and explain new words. Where it is right to, use te reo M&#257;ori alongside English.</li></ul></aside>
+<aside class="box tip"><h3>Respect other people's work</h3><p>Use pictures, sounds and code you made yourself, or that have a licence that lets you use them. Say where things came from. The pictures in this game are drawn by a small program, so there is nothing to copy.</p></aside>
+
+<h2>Project 1: a ship trading card</h2>
+<p><strong>Brief:</strong> make a web page with a "trading card" for one ship from the game. Use the ships table on the <a href="ships.html">Ships page</a> as your data.</p>
+<p>Start with this skeleton, then add your own content and CSS:</p>
+<pre class="inline"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en-NZ"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;Medic - ship card&lt;/title&gt;
+  &lt;link rel="stylesheet" href="card.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;main&gt;
+    &lt;article class="card"&gt;
+      &lt;h1&gt;Medic&lt;/h1&gt;
+      &lt;img src="medic.png" alt="A white spaceship with a green cross"&gt;
+      &lt;p&gt;Support ship that heals itself and its partner.&lt;/p&gt;
+      &lt;table&gt;
+        &lt;tr&gt;&lt;th scope="row"&gt;Hull&lt;/th&gt;&lt;td&gt;95&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;th scope="row"&gt;Ability&lt;/th&gt;&lt;td&gt;Repair Burst&lt;/td&gt;&lt;/tr&gt;
+      &lt;/table&gt;
+    &lt;/article&gt;
+  &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p><strong>Success criteria:</strong> valid HTML with a sensible heading order; an <code>alt</code> description on the image; a CSS file with at least five rules, including one colour variable; looks good on a phone-sized window.</p>
+
+<h2>Project 2: all the ships with JavaScript</h2>
+<p>Once your card works, show <em>all</em> ships by using a loop, so you only write the card once:</p>
+<pre class="inline"><code>const ships = [
+  { name: "Phantom", hull: 80,  ability: "Cloak" },
+  { name: "Medic",   hull: 95,  ability: "Repair Burst" }
+];
+const list = document.getElementById("cards");
+for (const s of ships) {
+  const card = document.createElement("article");
+  card.className = "card";
+  card.innerHTML = "&lt;h2&gt;" + s.name + "&lt;/h2&gt;&lt;p&gt;Hull: " + s.hull + "&lt;/p&gt;";
+  list.appendChild(card);
+}</code></pre>
+<p><strong>Extension:</strong> add a button that shows only ships with hull above 90 (a decision!).</p>
+
+<h2>Publishing with GitHub Pages</h2>
+<ol>
+<li>Put your files in a GitHub repository (this site is in a folder called <code>docs</code>).</li>
+<li>Open the repository's <strong>Settings</strong> and choose <strong>Pages</strong>.</li>
+<li>Choose <em>Deploy from a branch</em>, pick <code>main</code> and the <code>/docs</code> folder, then save.</li>
+<li>After a minute your site is live at <code>https://your-user.github.io/your-repo/</code>.</li>
+</ol>
+<p>Because every link on this site is relative, it works at that address with no changes. Open <code>docs/site-config.js</code> and type your user and repository name so the code links point to your repository.</p>
+
+<aside class="box tryit"><h3>Try it: view the source</h3><p>In your browser, right-click this page and choose <em>View page source</em>. Find the <code>&lt;nav&gt;</code> and the <code>&lt;main&gt;</code>. Then open the browser's developer tools and change a colour in the CSS to see what happens. (Your change disappears when you reload.)</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> What are the jobs of HTML, CSS and JavaScript?</summary><div class="answer">HTML gives structure and content, CSS gives the look, JavaScript gives behaviour.</div></details><details><summary><strong>2.</strong> Why does this site use <em>relative</em> links?</summary><div class="answer">They keep working wherever the site is hosted.</div></details><details><summary><strong>3.</strong> What is the point of the <code>alt</code> attribute?</summary><div class="answer">It describes a picture for people who cannot see it, such as someone using a screen reader.</div></details><details><summary><strong>4.</strong> What is a media query used for?</summary><div class="answer">To change the layout for different screen sizes, such as phones.</div></details><details><summary><strong>5.</strong> Which step of the design process comes after testing?</summary><div class="answer">Improving (and evaluating) the outcome.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="going-further.html">&larr; 11. Going further</a><a class="next" href="tutorial-steps.html">13. Rebuild it: prompts &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11. Going further - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html" aria-current="page">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>11. Going further</h1>
+<p class="lede">Multiplayer, safety and ideas to take the game further.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>get a first idea of how two computers can play one game</li><li>learn the words: network, client, server, protocol</li><li>think about staying safe online</li><li>find ideas to extend the game</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>explain why one computer is the 'host'</li><li>explain what a snapshot is</li><li>list two rules for staying safe when playing online</li></ul></div></div>
+
+<h2>Two computers, one game</h2>
+<p>When two people play together, both screens must show the <em>same</em> rocks and aliens. If each computer ran its own game, they would soon disagree. So one computer, the
+<strong>host</strong>, runs the real game. The other computer, the <strong>joiner</strong>, sends what keys it is pressing and draws pictures of the world the host sends back.</p>
+<figure class="diagram"><svg role="img" aria-label="Diagram of a host and a joiner exchanging messages" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar6" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#0f7a8a"/></marker></defs>
+<rect x="20" y="40" width="200" height="140" rx="12" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="120" y="70" text-anchor="middle" font-size="16" font-weight="bold">HOST</text>
+<text x="120" y="98" text-anchor="middle" font-size="13">runs the whole game:</text><text x="120" y="118" text-anchor="middle" font-size="13">rocks, aliens, rules</text><text x="120" y="150" text-anchor="middle" font-size="13">is the "truth"</text>
+<rect x="480" y="40" width="200" height="140" rx="12" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="580" y="70" text-anchor="middle" font-size="16" font-weight="bold">JOINER</text>
+<text x="580" y="98" text-anchor="middle" font-size="13">sends key presses,</text><text x="580" y="118" text-anchor="middle" font-size="13">draws what the host</text><text x="580" y="138" text-anchor="middle" font-size="13">sends back</text>
+<line x1="220" y1="85" x2="480" y2="85" stroke="#0f7a8a" stroke-width="3" marker-end="url(#ar6)"/><text x="350" y="75" text-anchor="middle" font-size="13">snapshots (30 per second)</text>
+<line x1="480" y1="150" x2="220" y2="150" stroke="#0f7a8a" stroke-width="3" marker-end="url(#ar6)"/><text x="350" y="172" text-anchor="middle" font-size="13">keys pressed (30 per second)</text>
+<text x="350" y="220" text-anchor="middle" font-size="14">Both messages travel as small pieces of text called JSON.</text></svg><figcaption>The host and the joiner talk by sending messages.</figcaption></figure>
+<h3>Finding a game</h3>
+<p>A host shouts "I'm here!" to everyone on the local network when asked. This is called a <strong>broadcast</strong>. The joiner's search sends a short question and listens for answers:</p>
+<figure class="code"><figcaption><span class="file">game/net.py</span> <span class="lines">lines 353&ndash;357</span> <a class="code-link" data-file="game/net.py" data-start="353" data-end="357" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> scan(<span class="t-self">self</span>, duration=<span class="t-n">1.2</span>):
+    <span class="t-k">if</span> <span class="t-self">self</span>.scanning:
+        <span class="t-k">return</span>
+    <span class="t-self">self</span>.scanning = <span class="t-k">True</span>
+    threading.Thread(target=<span class="t-self">self</span>._run, args=(duration,), daemon=<span class="t-k">True</span>).start()</code></pre></figure>
+<h3>Snapshots</h3>
+<p>About 30 times a second the host builds a <strong>snapshot</strong>: a list of where everything is. It is a dictionary turned into text (JSON) and sent over the network:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 99&ndash;128</span> <a class="code-link" data-file="game/game_view.py" data-start="99" data-end="128" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _network_tick(<span class="t-self">self</span>, dt):
+    srv = <span class="t-self">self</span>.server
+    <span class="t-k">if</span> srv <span class="t-k">is</span> <span class="t-k">None</span>:
+        <span class="t-k">return</span>
+    joined = srv.poll_join()
+    <span class="t-k">if</span> joined:
+        <span class="t-self">self</span>._add_remote(*joined)
+    <span class="t-k">if</span> <span class="t-self">self</span>.remote:
+        <span class="t-k">for</span> msg <span class="t-k">in</span> srv.client_messages():
+            kind = msg.get(<span class="t-s">&quot;t&quot;</span>)
+            <span class="t-k">if</span> kind == <span class="t-s">&quot;i&quot;</span>:
+                <span class="t-self">self</span>._remote_input(msg)
+            <span class="t-k">elif</span> kind == <span class="t-s">&quot;bye&quot;</span>:
+                <span class="t-self">self</span>._remove_remote(<span class="t-s">&quot;left the game&quot;</span>)
+                <span class="t-k">break</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.remote <span class="t-k">and</span> srv.client_lost(settings.get(<span class="t-s">&quot;net.timeout&quot;</span>)):
+        <span class="t-self">self</span>._remove_remote(<span class="t-s">&quot;lost connection&quot;</span>)
+    <span class="t-k">if</span> <span class="t-self">self</span>.remote:
+        <span class="t-self">self</span>.snap_timer += dt
+        <span class="t-k">if</span> <span class="t-self">self</span>.snap_timer &gt;= <span class="t-n">1.0</span> / max(<span class="t-n">5</span>, settings.get(<span class="t-s">&quot;net.snapshot_rate&quot;</span>)):
+            <span class="t-self">self</span>.snap_timer = <span class="t-n">0.0</span>
+            <span class="t-self">self</span>.seq += <span class="t-n">1</span>
+            srv.info.update(players=len(<span class="t-self">self</span>.players), level=<span class="t-self">self</span>.level)
+            srv.client.send_latest(<span class="t-self">self</span>._snapshot(<span class="t-self">self</span>.remote))
+            <span class="t-self">self</span>.pending_events, <span class="t-self">self</span>.new_effects = [], []
+
+<span class="t-k">def</span> _add_remote(<span class="t-self">self</span>, conn, hello):
+    name = str(hello.get(<span class="t-s">&quot;name&quot;</span>) <span class="t-k">or</span> <span class="t-s">&quot;Player 2&quot;</span>)[:<span class="t-n">16</span>]
+    <span class="t-k">if</span> name == <span class="t-self">self</span>.local.name:
+        name += <span class="t-s">&quot; 2&quot;</span></code></pre></figure>
+<h3>Smooth movement</h3>
+<p>Snapshots arrive in jumps, but we want smooth movement. The joiner <strong>interpolates</strong>: it slides things from their old position to their new one. For its own ship it <strong>predicts</strong>:
+it moves the ship straight away using the same rules as the host, then gently corrects if the host disagrees.</p>
+<figure class="code"><figcaption><span class="file">game/client_view.py</span> <span class="lines">lines 234&ndash;255</span> <a class="code-link" data-file="game/client_view.py" data-start="234" data-end="255" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _predict(<span class="t-self">self</span>, dt):
+    hs = <span class="t-self">self</span>.host_ship
+    <span class="t-k">if</span> hs <span class="t-k">is</span> <span class="t-k">None</span> <span class="t-k">or</span> <span class="t-self">self</span>.world <span class="t-k">is</span> <span class="t-k">None</span> <span class="t-k">or</span> <span class="t-self">self</span>.own <span class="t-k">is</span> <span class="t-k">None</span>:
+        <span class="t-self">self</span>.pred_ok = <span class="t-k">False</span>
+        <span class="t-k">if</span> <span class="t-self">self</span>.own <span class="t-k">is</span> <span class="t-k">not</span> <span class="t-k">None</span>:
+            <span class="t-self">self</span>.own.remove_from_sprite_lists()
+        <span class="t-k">return</span>
+    <span class="t-k">if</span> <span class="t-k">not</span> <span class="t-self">self</span>.own.sprite_lists:
+        <span class="t-self">self</span>.own_list.append(<span class="t-self">self</span>.own)
+    hx, hy, hspeed, hdx, hdy, hboost, hbear = hs[<span class="t-n">1</span>], hs[<span class="t-n">2</span>], hs[<span class="t-n">6</span>], hs[<span class="t-n">7</span>], hs[<span class="t-n">8</span>], hs[<span class="t-n">9</span>], hs[<span class="t-n">10</span>]
+    ww, wh = <span class="t-self">self</span>.world.width, <span class="t-self">self</span>.world.height
+    age = time.time() - <span class="t-self">self</span>.snap_time
+    hrad = math.radians(hbear)       <span class="t-c"># where the host&#x27;s ship is by now</span>
+    ex = (hx + (math.sin(hrad) * hspeed + hdx) * age) % ww
+    ey = (hy + (math.cos(hrad) * hspeed + hdy) * age) % wh
+    <span class="t-k">if</span> <span class="t-k">not</span> <span class="t-self">self</span>.pred_ok:
+        <span class="t-self">self</span>.px, <span class="t-self">self</span>.py, <span class="t-self">self</span>.pbearing, <span class="t-self">self</span>.pspeed = ex, ey, hbear, hspeed
+        <span class="t-self">self</span>.pred_ok = <span class="t-k">True</span>
+    k = <span class="t-self">self</span>.keys
+    <span class="t-self">self</span>.pbearing, <span class="t-self">self</span>.pspeed = control_step(
+        <span class="t-self">self</span>.pbearing, <span class="t-self">self</span>.pspeed, dt, arcade.key.UP <span class="t-k">in</span> k, arcade.key.DOWN <span class="t-k">in</span> k,
+        arcade.key.LEFT <span class="t-k">in</span> k, arcade.key.RIGHT <span class="t-k">in</span> k, bool(hboost), <span class="t-self">self</span>.mults)</code></pre></figure>
+<aside class="box tip"><h3>Why TCP?</h3><p>Computers send data in different ways. <strong>TCP</strong> guarantees everything arrives, in order. <strong>UDP</strong> is faster but may lose messages. The game uses TCP for play and UDP only for the 'who is hosting?' question.</p></aside>
+
+<h2>Staying safe</h2>
+<ul>
+<li>Only play with people you know, on a trusted network such as your school or home.</li>
+<li>Never share your address, school or full name in a game.</li>
+<li>Your teacher or caregiver should know who you are playing with.</li>
+<li>If someone makes you uncomfortable, stop playing and tell a trusted adult.</li>
+</ul>
+<p>Programmers have a responsibility too: this game never asks for personal information, and your credits are saved only on your own computer.</p>
+
+<h2>Ideas to extend the game</h2>
+<ul>
+<li>A new <strong>alien</strong> with its own <code>think</code> method (a Shielder that protects other aliens?).</li>
+<li>A new <strong>ship</strong> with an ability that heals nearby ships or slows time.</li>
+<li>A <strong>high-score table</strong> saved in a file.</li>
+<li>Your own <strong>art and sound</strong>: replace the generated pictures in <code>assets/images</code>.</li>
+<li>A <strong>level editor</strong> that places rocks by hand.</li>
+<li>Show your credits and scores on a <strong>web page</strong> (see the next page).</li>
+</ul>
+
+<h2>Using an AI helper well</h2>
+<p>An AI assistant can write code, but it is only a helper. You must <strong>read</strong> what it writes, <strong>test</strong> it, and be able to <strong>explain</strong> it. Good prompts are small, clear and ask for one thing at a time.
+The tutorial page shows examples.</p>
+<aside class="box tryit"><h3>Try it: explain it</h3><p>Pick any code box on this site. Write three sentences explaining it to a friend who has never programmed. Then ask a classmate to find anything you got wrong.</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> Why does one computer act as the host?</summary><div class="answer">So there is one true copy of the game, and both players see the same thing.</div></details><details><summary><strong>2.</strong> What is a snapshot?</summary><div class="answer">A list of where everything is at one moment, sent from host to joiner.</div></details><details><summary><strong>3.</strong> What does interpolation do?</summary><div class="answer">It slides things smoothly between the positions from two snapshots.</div></details><details><summary><strong>4.</strong> Give two safety rules for online games.</summary><div class="answer">For example: only play with people you know; do not share personal information.</div></details><details><summary><strong>5.</strong> Why must you test code an AI helper gives you?</summary><div class="answer">It can contain mistakes. You are responsible for checking it works and understanding it.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="rocks-hazards-rules.html">&larr; 10. Rocks, hazards, rules</a><a class="next" href="web-development.html">12. Web development &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

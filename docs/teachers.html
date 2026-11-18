@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teacher notes - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html" aria-current="page">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>Teacher notes</h1>
+<p class="lede">Curriculum links, a unit plan, set-up and publishing.</p>
+
+<h2>About this resource</h2>
+<p>These pages help learners in Years 9 and 10 (about ages 13&ndash;15) understand programming by exploring a complete, working game. They are written in New Zealand English with short sentences, new words explained on first use, and a glossary.
+Every code box is real code from the game, linked to the same lines on GitHub.</p>
+
+<h2>Curriculum links</h2>
+<p>The resource is designed to sit in the <strong>Technology</strong> learning area of <em>The New Zealand Curriculum</em>, in the <strong>Digital Technologies and Hangarau Matihiko</strong> content, with <strong>web development</strong> as the context for the design and make tasks.
+Please confirm the alignment against the current documents on the Ministry of Education's T&#257;h&#363;rangi curriculum site and your own school's programme, because the wording and progress outcomes are refreshed from time to time.</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Curriculum area (Technology: Digital Technologies and Hangarau Matihiko)</th><th scope="col">Where learners meet it</th></tr></thead><tbody><tr><td><strong>Computational thinking for digital technologies</strong>: algorithms and programming concepts (sequence, selection, iteration), variables and data, decomposition, testing and debugging</td><td>Pages 1, 2, 5, 6, 9; every 'Try it' task; the tutorial prompts</td></tr><tr><td><strong>Computational thinking</strong>: data representation and structures (lists, dictionaries, JSON), abstraction (classes, functions)</td><td>Pages 2, 3, 4, 8</td></tr><tr><td><strong>Designing and developing digital outcomes</strong>: design process, user needs, iteration, accessibility, ethics and legal considerations, evaluation</td><td>Page 12; page 11 (safety); tutorial page (using AI helpers responsibly)</td></tr><tr><td><strong>Web development context</strong>: HTML, CSS, JavaScript, hosting and publishing a static site</td><td>Page 12 and the site itself</td></tr></tbody></table></div>
+<p>The skills lead into senior digital technologies courses and NCEA. The activities support the key competencies, especially <em>thinking</em>, <em>using language, symbols and texts</em>, and <em>managing self</em>.</p>
+
+<h2>Suggested ten-week plan</h2>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Week</th><th scope="col">Focus</th><th scope="col">Pages</th><th scope="col">Outcome</th></tr></thead><tbody><tr><td>1</td><td>Get it running; explore the game</td><td>Start here</td><td>Game runs; learners can name three things in it that are 'data' and three that are 'actions'.</td></tr><tr><td>2</td><td>Variables, selection, iteration</td><td>1</td><td>Learners predict what small code boxes do and complete the 'Try it' tasks.</td></tr><tr><td>3</td><td>Memory and data structures</td><td>2</td><td>Memory diagrams for lists/dicts; the copy-vs-reference experiment.</td></tr><tr><td>4</td><td>Classes and objects</td><td>3</td><td>Learners write a small class of their own.</td></tr><tr><td>5</td><td>Inheritance and design; game loop</td><td>4, 5</td><td>Class diagram of an extension (a new alien).</td></tr><tr><td>6</td><td>Physics and maths in code</td><td>6</td><td>Modify gravity and wrap-around; explain results.</td></tr><tr><td>7</td><td>Systems: levels, ships, aliens, rules</td><td>7&ndash;10</td><td>Add a new ship using the settings; tune an alien.</td></tr><tr><td>8</td><td>Web development</td><td>12</td><td>Design brief, planning and the first version of a ship card page.</td></tr><tr><td>9</td><td>Build and test</td><td>12</td><td>Peer testing (phone and laptop), accessibility check, improvements.</td></tr><tr><td>10</td><td>Showcase and reflect</td><td>11, 13</td><td>Publish, present, evaluate; reflect on using AI helpers.</td></tr></tbody></table></div>
+
+<h2>Assessment ideas</h2>
+<ul>
+<li><strong>Formative:</strong> the 'Check your understanding' questions, 'Try it' tasks, and learners explaining a code box to a partner.</li>
+<li><strong>Summative (web development):</strong> a ship or alien page. Suggested criteria: valid, semantic HTML; a CSS file with variables and a media query; alt text and strong contrast; evidence of testing on two devices; a short evaluation saying what was improved and why.</li>
+<li><strong>Using AI helpers:</strong> ask learners to keep a short log: the prompt, what was wrong, how they fixed it, and what they learned. Learners should be able to explain any code they submit.</li>
+<li>Invite whānau to a showcase where learners explain their pages.</li>
+</ul>
+
+<h2>Setting up</h2>
+<ol>
+<li>Install <strong>Python 3.10 or newer</strong> from python.org (on Windows tick &lsquo;Add Python to PATH&rsquo;). Linux usually has it already.</li>
+<li>Unzip the game. On Windows double-click <code>run_windows.bat</code>. On Linux or Mac run <code>./run_linux.sh</code>. The first run creates a private Python environment and installs Arcade and Pillow, so it needs internet access once.</li>
+<li>For learners who want to experiment, <a href="https://thonny.org">Thonny</a> or Visual Studio Code both work well.</li>
+<li><strong>School networks:</strong> two-player mode uses port 5555 on the local network only. Check with your network manager before using it. Single player needs no network.</li>
+</ol>
+
+<h2>Publishing this website</h2>
+<ol>
+<li>Create a GitHub repository and upload the project (including the <code>docs</code> folder).</li>
+<li>In <code>docs/site-config.js</code> change <code>YOUR-USER</code> to your GitHub user name and check the repository name and branch.</li>
+<li>In the repository's Settings choose Pages, deploy from the <code>main</code> branch and the <code>/docs</code> folder.</li>
+</ol>
+<p>If you change the game's code, run <code>python tools/build_docs.py</code> to refresh the snippets, line numbers, tables and diagrams.</p>
+<p>Check that GitHub's age and privacy rules suit your school before asking learners to create their own accounts. Teachers can publish the shared site instead.</p>
+
+<h2>Differentiation</h2>
+<ul>
+<li><strong>Support:</strong> use pages 1&ndash;3 with the 'Try it' tasks; let learners work in pairs; use the glossary; focus on changing numbers before changing code.</li>
+<li><strong>Extend:</strong> write a new alien class, add a new hazard, build the JavaScript card page, or complete the later tutorial prompts.</li>
+</ul>
+
+<h2>Safety and ethics</h2>
+<ul>
+<li>Credits are an in-game score only. The game never uses real money and collects no personal data. The profile is a small file on the learner's own computer.</li>
+<li>Multiplayer is for people on the same local network. Discuss the safety points on page 11.</li>
+<li>The pictures and sounds are generated by the program and may be replaced. If you use other people's media, check its licence. The Arcade and Pillow libraries are open-source; read their licences if you plan to share the game widely.</li>
+</ul>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="glossary.html">&larr; Glossary</a><span></span></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

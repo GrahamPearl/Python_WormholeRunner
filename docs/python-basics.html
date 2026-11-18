@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. Python basics - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html" aria-current="page">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>1. Python basics</h1>
+<p class="lede">Variables, decisions and loops, using code from the real game.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>understand variables and different kinds of data</li><li>use <code>if</code>, <code>elif</code> and <code>else</code> to make decisions</li><li>use <code>for</code> and <code>while</code> loops to repeat things</li><li>write and use functions</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>explain what a variable is using an example from the game</li><li>read an <code>if</code> statement and say when each branch runs</li><li>say how many times a <code>for</code> loop will run</li><li>explain why a function is useful</li></ul></div></div>
+
+<h2>Programs are instructions</h2>
+<p>A program is a list of instructions the computer follows <strong>in order</strong>. This is called <strong>sequence</strong>.
+There are two other big ideas: <strong>selection</strong> (making a choice) and <strong>iteration</strong> (repeating).
+Every program you will ever meet is built from these three ideas.</p>
+
+<h2>Variables: labelled boxes</h2>
+<p>A <strong>variable</strong> is a name that points to a value. In the game the ship has a health value.
+When it is hit, the health goes down:</p>
+<pre class="inline"><code>health = 100        # make a variable
+health = health - 25   # use it, then store the new answer
+</code></pre>
+<p>Python has several kinds of data (called <strong>types</strong>):</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Type</th><th scope="col">What it holds</th><th scope="col">Example from the game</th></tr></thead><tbody><tr><td><code>int</code></td><td>whole numbers</td><td><code>count = 6</code> (rocks at the start)</td></tr><tr><td><code>float</code></td><td>numbers with decimals</td><td><code>speed = 420.0</code></td></tr><tr><td><code>str</code></td><td>text (a string)</td><td><code>name = "Phantom"</code></td></tr><tr><td><code>bool</code></td><td><code>True</code> or <code>False</code></td><td><code>enabled = True</code></td></tr></tbody></table></div>
+
+<h2>Selection: <code>if</code>, <code>elif</code>, <code>else</code></h2>
+<p>A <strong>conditional statement</strong> lets the program choose. The ship's steering code asks four yes/no questions:
+"Is the left key down? Is the right key down?" and so on.</p>
+<figure class="code"><figcaption><span class="file">game/sprites.py</span> <span class="lines">lines 41&ndash;55</span> <a class="code-link" data-file="game/sprites.py" data-start="41" data-end="55" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> control_step(bearing, speed, dt, up, down, left, right, boosted, mults=(<span class="t-n">1.0</span>, <span class="t-n">1.0</span>, <span class="t-n">1.0</span>)):
+    <span class="t-s">&quot;&quot;&quot;Turning and throttle. Shared by the real ship and the joiner&#x27;s predicted ship.&quot;&quot;&quot;</span>
+    cfg = settings.get
+    boost = cfg(<span class="t-s">&quot;ship.boost_multiplier&quot;</span>) <span class="t-k">if</span> boosted <span class="t-k">else</span> <span class="t-n">1.0</span>
+    speed_m, accel_m, turn_m = mults
+    <span class="t-k">if</span> left:
+        bearing -= cfg(<span class="t-s">&quot;ship.turn_rate&quot;</span>) * turn_m * dt
+    <span class="t-k">if</span> right:
+        bearing += cfg(<span class="t-s">&quot;ship.turn_rate&quot;</span>) * turn_m * dt
+    <span class="t-k">if</span> up:
+        speed += cfg(<span class="t-s">&quot;ship.acceleration&quot;</span>) * accel_m * boost * dt
+    <span class="t-k">if</span> down:
+        speed -= cfg(<span class="t-s">&quot;ship.acceleration&quot;</span>) * accel_m * boost * <span class="t-n">1.5</span> * dt
+    speed = max(<span class="t-n">0.0</span>, min(speed, cfg(<span class="t-s">&quot;ship.max_speed&quot;</span>) * speed_m * boost))
+    <span class="t-k">return</span> bearing % <span class="t-n">360.0</span>, speed</code></pre><p class="code-note">Each <code>if</code> only runs its indented lines when the condition is <code>True</code>. The last two lines use <code>max</code> and <code>min</code> to keep the speed between 0 and the top speed.</p></figure>
+<p>Look at this line: <code>boost = cfg("ship.boost_multiplier") if boosted else 1.0</code>. It is a short way to write
+"if boosted is true, use the boost number, otherwise use 1.0". This is called a <strong>conditional expression</strong>.</p>
+<aside class="box tip"><h3>Comparing values</h3><p>Use <code>==</code> to ask <em>are these equal?</em>, <code>!=</code> for <em>not equal</em>, and <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code> for sizes. Join conditions with <code>and</code>, <code>or</code> and <code>not</code>. A single <code>=</code> is different: it <em>stores</em> a value.</p></aside>
+
+<h3>Decisions inside decisions</h3>
+<p>You can put an <code>if</code> inside another <code>if</code>. This is called <strong>nesting</strong>. Here the game replaces
+rocks that have been destroyed, but only if there are too few rocks <em>and</em> the timer has run out:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 882&ndash;887</span> <a class="code-link" data-file="game/game_view.py" data-start="882" data-end="887" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _update_respawns(<span class="t-self">self</span>, dt):
+    <span class="t-k">if</span> len(<span class="t-self">self</span>.rock_list) &lt; <span class="t-self">self</span>.target_rocks:
+        <span class="t-self">self</span>.respawn_timer -= dt
+        <span class="t-k">if</span> <span class="t-self">self</span>.respawn_timer &lt;= <span class="t-n">0</span>:
+            <span class="t-self">self</span>._spawn_rock(<span class="t-n">3</span>)
+            <span class="t-self">self</span>.respawn_timer = settings.get(<span class="t-s">&quot;rocks.respawn_time&quot;</span>)</code></pre></figure>
+
+<h2>Iteration: loops</h2>
+<h3>The <code>for</code> loop: repeat for each item</h3>
+<p>Every rock pulls on your ship with gravity. The game adds up the pull from <em>each</em> rock using a <code>for</code> loop:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 525&ndash;535</span> <a class="code-link" data-file="game/game_view.py" data-start="525" data-end="535" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _gravity_on(<span class="t-self">self</span>, ship):
+    g = settings.get(<span class="t-s">&quot;physics.gravity&quot;</span>) * <span class="t-self">self</span>._gravity_factor()
+    soft = settings.get(<span class="t-s">&quot;physics.softening&quot;</span>)
+    cap = settings.get(<span class="t-s">&quot;physics.max_accel&quot;</span>)
+    ax = ay = <span class="t-n">0.0</span>
+    <span class="t-k">for</span> rock <span class="t-k">in</span> <span class="t-self">self</span>.rock_list:
+        dx, dy = <span class="t-self">self</span>.world.delta(ship.center_x, ship.center_y, rock.center_x, rock.center_y)
+        dax, day = gravity_accel(dx, dy, rock.mass, g, soft, cap)
+        ax += dax
+        ay += day
+    <span class="t-k">return</span> ax, ay</code></pre><p class="code-note">The loop runs once for every rock in <code>self.rock_list</code>. With 12 rocks, the lines inside run 12 times.</p></figure>
+<p>You can also loop a set number of times with <code>range</code>. <code>for _ in range(5):</code> repeats five times.
+(The underscore <code>_</code> means "I don't need the counter".) Loops can be <strong>nested</strong> (a loop inside a loop).
+The code that creates aliens does this: one loop for each kind of alien, and another loop for how many of that kind.</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 381&ndash;399</span> <a class="code-link" data-file="game/game_view.py" data-start="381" data-end="399" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _spawn_aliens(<span class="t-self">self</span>):
+    <span class="t-s">&quot;&quot;&quot;Populate the level. Returns True if a boss was spawned.&quot;&quot;&quot;</span>
+    a = settings.get(<span class="t-s">&quot;aliens&quot;</span>)
+    kinds = EXPEDITION_ALIENS <span class="t-k">if</span> <span class="t-self">self</span>.expedition <span class="t-k">else</span> CLASSIC_ALIENS
+    <span class="t-k">for</span> kind <span class="t-k">in</span> kinds:
+        cfg = a[kind]
+        <span class="t-k">if</span> <span class="t-k">not</span> cfg.get(<span class="t-s">&quot;enabled&quot;</span>) <span class="t-k">or</span> <span class="t-self">self</span>.level &lt; cfg[<span class="t-s">&quot;min_level&quot;</span>]:
+            <span class="t-k">continue</span>
+        count = max(<span class="t-n">1</span>, round((<span class="t-n">1</span> + (<span class="t-self">self</span>.level - cfg[<span class="t-s">&quot;min_level&quot;</span>]) // <span class="t-n">3</span>) * <span class="t-self">self</span>.world_scale))
+        <span class="t-k">for</span> _ <span class="t-k">in</span> range(count):
+            x, y = <span class="t-self">self</span>._far_pos(<span class="t-n">350</span>)
+            <span class="t-k">if</span> kind == <span class="t-s">&quot;swarm&quot;</span>:
+                size = max(<span class="t-n">1</span>, int(cfg[<span class="t-s">&quot;group_size&quot;</span>]))
+                phase = random.uniform(<span class="t-n">0</span>, <span class="t-n">360</span>)
+                <span class="t-k">for</span> slot <span class="t-k">in</span> range(size):
+                    <span class="t-self">self</span>.alien_list.append(Swarm(x, y, <span class="t-self">self</span>.level, slot, size, phase))
+            <span class="t-k">else</span>:
+                <span class="t-self">self</span>.alien_list.append(ALIEN_CLASSES[kind](x, y, <span class="t-self">self</span>.level))
+        <span class="t-self">self</span>._sfx(<span class="t-s">f&quot;</span>{kind}<span class="t-s">_spawn</span><span class="t-s">&quot;</span>)</code></pre></figure>
+<p><code>continue</code> means "skip the rest of this go and start the next one". <code>break</code> means "stop the loop now".</p>
+
+<h3>The <code>while</code> loop: repeat until something changes</h3>
+<p>A <code>while</code> loop keeps going as long as its condition is <code>True</code>. When two computers play together, a helper keeps
+listening for messages for as long as the connection is alive:</p>
+<figure class="code"><figcaption><span class="file">game/net.py</span> <span class="lines">lines 98&ndash;123</span> <a class="code-link" data-file="game/net.py" data-start="98" data-end="123" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _reader(<span class="t-self">self</span>):
+    buf = <span class="t-s">b&quot;&quot;</span>
+    <span class="t-k">try</span>:
+        <span class="t-k">while</span> <span class="t-self">self</span>.alive:
+            <span class="t-k">try</span>:
+                chunk = <span class="t-self">self</span>.sock.recv(<span class="t-n">65536</span>)
+            <span class="t-k">except</span> socket.timeout:
+                <span class="t-k">continue</span>
+            <span class="t-k">if</span> <span class="t-k">not</span> chunk:
+                <span class="t-k">break</span>
+            <span class="t-self">self</span>.last_recv = time.time()
+            buf += chunk
+            <span class="t-k">if</span> len(buf) &gt; <span class="t-n">4_000_000</span>:
+                <span class="t-k">break</span>
+            <span class="t-k">while</span> <span class="t-s">b&quot;\n&quot;</span> <span class="t-k">in</span> buf:
+                line, buf = buf.split(<span class="t-s">b&quot;\n&quot;</span>, <span class="t-n">1</span>)
+                <span class="t-k">if</span> line:
+                    <span class="t-k">try</span>:
+                        <span class="t-self">self</span>.inbox.put(json.loads(line))
+                    <span class="t-k">except</span> ValueError:
+                        <span class="t-k">pass</span>
+    <span class="t-k">except</span> OSError:
+        <span class="t-k">pass</span>
+    <span class="t-k">finally</span>:
+        <span class="t-self">self</span>.alive = <span class="t-k">False</span>
+        <span class="t-self">self</span>._evt.set()</code></pre><p class="code-note"><code>while self.alive:</code> repeats until the connection closes. <code>try</code>/<code>except</code> catches errors so the program does not crash.</p></figure>
+<aside class="box warn"><h3>Careful: endless loops</h3><p>If a <code>while</code> condition never becomes <code>False</code>, the loop never ends and your program freezes. Always make sure something inside the loop changes the condition.</p></aside>
+
+<h2>Functions: reusable recipes</h2>
+<p>A <strong>function</strong> is a named block of code you can use again and again. It can take <strong>parameters</strong>
+(inputs) and <strong>return</strong> a result. The gravity rule is a small function that works out how hard one rock pulls:</p>
+<figure class="code"><figcaption><span class="file">game/physics.py</span> <span class="lines">lines 5&ndash;13</span> <a class="code-link" data-file="game/physics.py" data-start="5" data-end="13" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> gravity_accel(dx, dy, mass, strength, softening, max_accel):
+    <span class="t-s">&quot;&quot;&quot;Acceleration toward a rock that is (dx, dy) away (use World.delta for wrap-around).
+
+    Newtonian-style: grows with the rock&#x27;s mass, falls with distance squared.
+    &quot;&quot;&quot;</span>
+    dist_sq = dx * dx + dy * dy + softening * softening
+    dist = math.sqrt(dist_sq)
+    accel = min(strength * mass / dist_sq, max_accel)
+    <span class="t-k">return</span> accel * dx / dist, accel * dy / dist</code></pre></figure>
+<p>The names in the brackets are the inputs. The <code>return</code> line sends two answers back. Because it is a function,
+the game can use the same rule for rocks, for black holes and for anything else that pulls.</p>
+
+<aside class="box tryit"><h3>Try it: change a number</h3><p>Find <code>"gravity": 600000.0</code> in <code>game/config.py</code> (or use the in-game Game Editor). Make it much bigger, then play. What happens to your ship near a rock? Now make it 0. Why does the ship stop being pulled?</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> What are the three big ideas every program is built from?</summary><div class="answer">Sequence (steps in order), selection (choices with <code>if</code>) and iteration (repeating with loops).</div></details><details><summary><strong>2.</strong> In <code>control_step</code>, what happens if <code>up</code> is <code>False</code>?</summary><div class="answer">The lines inside <code>if up:</code> are skipped, so the speed does not increase.</div></details><details><summary><strong>3.</strong> A <code>for</code> loop goes over 12 rocks. How many times do the lines inside it run?</summary><div class="answer">12 times, once per rock.</div></details><details><summary><strong>4.</strong> Why does <code>gravity_accel</code> use a function instead of copying the code each time?</summary><div class="answer">A function can be reused. If the rule needs fixing, you fix it in one place.</div></details><details><summary><strong>5.</strong> What is the difference between <code>=</code> and <code>==</code>?</summary><div class="answer"><code>=</code> stores a value in a variable. <code>==</code> asks whether two values are equal.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="index.html">&larr; Start here</a><a class="next" href="memory-and-data.html">2. Memory and data &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

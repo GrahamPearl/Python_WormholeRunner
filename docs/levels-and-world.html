@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7. Levels and the world - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html" aria-current="page">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>7. Levels and the world</h1>
+<p class="lede">How levels are built and how the game gets harder.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>see how a level is built from rules and numbers</li><li>understand how the game gets harder as levels go up</li><li>understand how a bigger map is created and how the camera zooms out</li><li>read a formula in code</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>explain how many rocks a level has</li><li>explain the job of the wormhole</li><li>predict the map size for any level</li></ul></div></div>
+
+<h2>The goal of a level</h2>
+<p>In every level the aim is the same: <strong>survive, finish the objective, then fly into the wormhole</strong>. A wormhole appears at a random time and stays open for a few seconds.
+In <em>Expedition</em> mode it will not open until the objective is done. On every fifth level, a boss ship called the Mothership must be destroyed first.</p>
+
+<h2>Building a level</h2>
+<p>When a level starts, one method builds everything. Read it from top to bottom. It is a long list of steps, which is a great example of <strong>sequence</strong>.</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 295&ndash;333</span> <a class="code-link" data-file="game/game_view.py" data-start="295" data-end="333" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _start_level(<span class="t-self">self</span>, first=<span class="t-k">False</span>):
+    <span class="t-self">self</span>.world_scale = min(settings.get(<span class="t-s">&quot;world.max_scale&quot;</span>),
+                           <span class="t-n">1.0</span> + settings.get(<span class="t-s">&quot;world.growth_per_level&quot;</span>) * (<span class="t-self">self</span>.level - <span class="t-n">1</span>))
+    <span class="t-self">self</span>.world = World(W * <span class="t-self">self</span>.world_scale, H * <span class="t-self">self</span>.world_scale)
+    <span class="t-self">self</span>.background = Background(<span class="t-self">self</span>.world.width, <span class="t-self">self</span>.world.height)
+    <span class="t-self">self</span>.zoom_target = <span class="t-n">1.0</span> / <span class="t-self">self</span>.world_scale
+    <span class="t-k">if</span> first:
+        <span class="t-self">self</span>.zoom = <span class="t-self">self</span>.zoom_target
+    <span class="t-k">for</span> sprite_list <span class="t-k">in</span> (<span class="t-self">self</span>.rock_list, <span class="t-self">self</span>.alien_list, <span class="t-self">self</span>.bullet_list,
+                        <span class="t-self">self</span>.powerup_list, <span class="t-self">self</span>.wormhole_list):
+        sprite_list.clear()
+    <span class="t-self">self</span>.effects = []
+    <span class="t-self">self</span>.wormhole = <span class="t-k">None</span>
+    cx, cy = <span class="t-self">self</span>.world.center
+    n = len(<span class="t-self">self</span>.players)
+    <span class="t-k">for</span> i, p <span class="t-k">in</span> enumerate(<span class="t-self">self</span>.players):
+        <span class="t-k">if</span> <span class="t-k">not</span> p.alive:
+            p.revive()
+        <span class="t-k">if</span> <span class="t-k">not</span> p.ship.sprite_lists:
+            <span class="t-self">self</span>.ship_list.append(p.ship)
+        p.ship.center_x, p.ship.center_y = cx + (i - (n - <span class="t-n">1</span>) / <span class="t-n">2</span>) * <span class="t-n">80</span>, cy
+        p.ship.drift_x = p.ship.drift_y = <span class="t-n">0.0</span>
+        p.ship.active = <span class="t-n">0.0</span>
+        <span class="t-k">if</span> <span class="t-k">not</span> first:
+            p.ship.grace_timer = max(p.ship.grace_timer, <span class="t-n">1.0</span>)
+
+    extra = settings.get(<span class="t-s">&quot;difficulty.extra_rocks_per_level&quot;</span>) * (<span class="t-self">self</span>.level - <span class="t-n">1</span>)
+    <span class="t-self">self</span>.target_rocks = int(round((settings.get(<span class="t-s">&quot;rocks.count&quot;</span>) + extra) * <span class="t-self">self</span>.world_scale))
+    <span class="t-k">for</span> _ <span class="t-k">in</span> range(<span class="t-self">self</span>.target_rocks):
+        <span class="t-self">self</span>._spawn_rock(random.choice((<span class="t-n">3</span>, <span class="t-n">3</span>, <span class="t-n">2</span>)))
+    boss = <span class="t-self">self</span>._spawn_aliens()
+    <span class="t-self">self</span>._spawn_hazards()
+    <span class="t-self">self</span>._setup_objective(boss)
+
+    <span class="t-self">self</span>.powerup_timer = <span class="t-self">self</span>._powerup_interval()
+    <span class="t-self">self</span>.wormhole_timer = <span class="t-self">self</span>._next_wormhole_delay()
+    <span class="t-self">self</span>.respawn_timer = settings.get(<span class="t-s">&quot;rocks.respawn_time&quot;</span>)
+    <span class="t-self">self</span>.banner_timer = <span class="t-n">2.5</span>
+    <span class="t-self">self</span>.banner_text = <span class="t-s">f&quot;</span><span class="t-s">LEVEL </span>{<span class="t-self">self</span>.level}<span class="t-s">&quot;</span></code></pre></figure>
+<p>Notice how the level number appears in formulas. Here is the rule for the <strong>size of the map</strong>:</p>
+<pre class="inline"><code>world_scale = min(max_scale, 1.0 + growth_per_level * (level - 1))</code></pre>
+<p>With the default settings (growth 0.25, maximum 3.0), level 1 is 1.0, level 2 is 1.25, level 3 is 1.5, and so on, until it stops at 3.0 (level 9). <code>min</code> picks the smaller of the two numbers so the map never grows past the limit.</p>
+
+<h2>Difficulty goes up with the level</h2>
+<p>Three small numbers make later levels harder. For each level above 1, rocks are 8% faster and gravity is 10% stronger. There are more rocks, and later levels bring new aliens and hazards.</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Level</th><th scope="col">Map size</th><th scope="col">Rocks</th><th scope="col">Rock speed</th><th scope="col">Gravity</th><th scope="col">Aliens</th><th scope="col">Hazards</th><th scope="col">Objective</th></tr></thead><tbody><tr><td><strong>1</strong></td><td>&times;1.00</td><td>6</td><td>&times;1.00</td><td>&times;1.0</td><td>Drifter &times;1</td><td>None</td><td>None</td></tr><tr><td><strong>2</strong></td><td>&times;1.25</td><td>9</td><td>&times;1.08</td><td>&times;1.1</td><td>Drifter &times;1, Chaser &times;1</td><td>Nebula</td><td>Collect crystals</td></tr><tr><td><strong>3</strong></td><td>&times;1.50</td><td>12</td><td>&times;1.16</td><td>&times;1.2</td><td>Drifter &times;2, Chaser &times;2, Sniper &times;2, Seeker &times;2</td><td>Nebula, Black hole, Solar flare</td><td>Rescue pods</td></tr><tr><td><strong>4</strong></td><td>&times;1.75</td><td>16</td><td>&times;1.24</td><td>&times;1.3</td><td>Drifter &times;4, Chaser &times;2, Sniper &times;2, Swarm &times;2 (groups of 4), Seeker &times;2, Teleporter &times;2</td><td>Nebula, Black hole, Ion storm, Solar flare</td><td>Escort the freighter</td></tr><tr><td><strong>5</strong></td><td>&times;2.00</td><td>20</td><td>&times;1.32</td><td>&times;1.4</td><td>Drifter &times;4, Chaser &times;4, Sniper &times;2, Swarm &times;2 (groups of 4), Seeker &times;2, Teleporter &times;2, Minelayer &times;2, <strong>Mothership</strong></td><td>Nebula, Black hole, Ion storm, Solar flare</td><td>Destroy the mothership</td></tr><tr><td><strong>6</strong></td><td>&times;2.25</td><td>25</td><td>&times;1.40</td><td>&times;1.5</td><td>Drifter &times;4, Chaser &times;4, Sniper &times;4, Swarm &times;2 (groups of 4), Seeker &times;4, Teleporter &times;2, Minelayer &times;2</td><td>Nebula, Black hole, Ion storm, Solar flare</td><td>Rescue pods</td></tr><tr><td><strong>7</strong></td><td>&times;2.50</td><td>30</td><td>&times;1.48</td><td>&times;1.6</td><td>Drifter &times;8, Chaser &times;5, Sniper &times;5, Swarm &times;5 (groups of 4), Seeker &times;5, Teleporter &times;5, Minelayer &times;2</td><td>Nebula, Black hole, Ion storm, Solar flare</td><td>Escort the freighter</td></tr><tr><td><strong>8</strong></td><td>&times;2.75</td><td>36</td><td>&times;1.56</td><td>&times;1.7</td><td>Drifter &times;8, Chaser &times;8, Sniper &times;6, Swarm &times;6 (groups of 4), Seeker &times;6, Teleporter &times;6, Minelayer &times;6</td><td>Nebula, Black hole, Ion storm, Solar flare</td><td>Collect crystals</td></tr><tr><td><strong>9</strong></td><td>&times;3.00</td><td>42</td><td>&times;1.64</td><td>&times;1.8</td><td>Drifter &times;9, Chaser &times;9, Sniper &times;9, Swarm &times;6 (groups of 4), Seeker &times;9, Teleporter &times;6, Minelayer &times;6</td><td>Nebula, Black hole, Ion storm, Solar flare</td><td>Rescue pods</td></tr><tr><td><strong>10</strong></td><td>&times;3.00</td><td>45</td><td>&times;1.72</td><td>&times;1.9</td><td>Drifter &times;12, Chaser &times;9, Sniper &times;9, Swarm &times;9 (groups of 4), Seeker &times;9, Teleporter &times;9, Minelayer &times;6, <strong>Mothership</strong></td><td>Nebula, Black hole, Ion storm, Solar flare</td><td>Destroy the mothership</td></tr></tbody></table></div>
+<p>This table was <em>generated from the game's own settings</em> by a Python script, so it always matches the real rules.</p>
+
+<h2>Zooming out: the camera</h2>
+<p>A bigger map would not fit on your screen, so the camera <strong>zooms out</strong>. At map size 2.0, the zoom is 1 &divide; 2.0 = 0.5, so everything looks half as big. The change is smooth, not sudden. Each frame the zoom moves a small part of the way to the target:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">line 463</span> <a class="code-link" data-file="game/game_view.py" data-start="463" data-end="463" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-self">self</span>.zoom += (<span class="t-self">self</span>.zoom_target - <span class="t-self">self</span>.zoom) * min(<span class="t-n">1.0</span>, dt * settings.get(<span class="t-s">&quot;world.zoom_speed&quot;</span>))</code></pre></figure>
+<p>This is a classic trick called <strong>easing</strong>: <code>value += (target - value) * small_number</code>.</p>
+
+<h2>Finishing a level</h2>
+<p>When a ship touches an open wormhole, <em>both</em> players move on. The code adds points and credits, raises the level number, saves your credits and builds the next level:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 871&ndash;880</span> <a class="code-link" data-file="game/game_view.py" data-start="871" data-end="880" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _complete_level(<span class="t-self">self</span>):
+    <span class="t-self">self</span>._sfx(<span class="t-s">&quot;wormhole&quot;</span>)
+    <span class="t-k">for</span> p <span class="t-k">in</span> <span class="t-self">self</span>.players:
+        p.score += <span class="t-n">200</span> * <span class="t-self">self</span>.level
+        <span class="t-self">self</span>._earn(p.id, settings.get(<span class="t-s">&quot;credits.level_clear&quot;</span>) * <span class="t-self">self</span>.level)
+    <span class="t-self">self</span>.level += <span class="t-n">1</span>
+    <span class="t-self">self</span>._bank()
+    <span class="t-self">self</span>._start_level()
+    <span class="t-k">if</span> <span class="t-self">self</span>.expedition:
+        <span class="t-self">self</span>._begin_perks()</code></pre></figure>
+<a class="code-link" data-file="game/game_view.py" data-start="381" data-end="407" href="https://github.com/">See _spawn_aliens in the full file</a>
+
+<aside class="box tryit"><h3>Try it: design a level</h3><p>Pick level 6 in the table. How many rocks are there? Which aliens appear? Now open <code>game/config.py</code> and find the numbers
+<code>"growth_per_level"</code> and <code>"extra_rocks_per_level"</code>. Change them, run the game and see if you were right.</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> What is the map size at level 5 with default settings?</summary><div class="answer">1.0 + 0.25 &times; 4 = 2.0 times the screen.</div></details><details><summary><strong>2.</strong> What does <code>min(3.0, 4.5)</code> return?</summary><div class="answer">3.0, the smaller value.</div></details><details><summary><strong>3.</strong> Why must the camera zoom out when the map gets bigger?</summary><div class="answer">The bigger map would not fit on the screen otherwise.</div></details><details><summary><strong>4.</strong> Which part of <code>_start_level</code> would you change to add more rocks per level?</summary><div class="answer">The lines that work out <code>target_rocks</code>, or the <code>extra_rocks_per_level</code> setting.</div></details><details><summary><strong>5.</strong> What must happen on boss levels before a wormhole opens?</summary><div class="answer">The Mothership must be destroyed.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="physics.html">&larr; 6. Physics</a><a class="next" href="ships.html">8. Ships and credits &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5. The game loop - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html" aria-current="page">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>5. The game loop</h1>
+<p class="lede">How the game runs, frame after frame.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>understand that a game is one big loop</li><li>explain what <code>on_update</code>, <code>on_draw</code> and <code>dt</code> are for</li><li>see how input events reach the code</li><li>understand why the order of drawing matters</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>describe the game loop in my own words</li><li>explain why movement is multiplied by <code>dt</code></li><li>say what happens to a sprite drawn last</li></ul></div></div>
+
+<h2>A game is a loop</h2>
+<p>A film is many still pictures shown quickly. A game is the same. About 60 times every second the game does three things:
+<strong>(1)</strong> check what the player pressed, <strong>(2)</strong> update the world, <strong>(3)</strong> draw a new picture.
+Each round is called a <strong>frame</strong>.</p>
+<figure class="diagram"><svg role="img" aria-label="Flowchart of the game loop" viewBox="0 0 700 330" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#0f7a8a"/></marker></defs>
+<g stroke="#0f7a8a" stroke-width="3" fill="none" marker-end="url(#ar)">
+<path d="M130 60 H190"/><path d="M350 60 H410"/><path d="M570 60 H600 V120"/><path d="M600 190 V240 H350"/><path d="M190 240 H100 V120 L100 60"/>
+</g>
+<rect x="20" y="30" width="110" height="60" rx="10" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="75" y="58" text-anchor="middle" font-size="14">Start</text><text x="75" y="76" text-anchor="middle" font-size="12">open window</text>
+<rect x="190" y="30" width="160" height="60" rx="10" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="270" y="56" text-anchor="middle" font-size="14">Read input</text><text x="270" y="76" text-anchor="middle" font-size="12">keys, network</text>
+<rect x="410" y="30" width="160" height="60" rx="10" fill="#fff6dd" stroke="#b86e00" stroke-width="2"/><text x="490" y="56" text-anchor="middle" font-size="14">on_update(dt)</text><text x="490" y="76" text-anchor="middle" font-size="12">move + rules</text>
+<rect x="520" y="120" width="160" height="70" rx="10" fill="#f1e9ff" stroke="#7a4fd6" stroke-width="2"/><text x="600" y="150" text-anchor="middle" font-size="14">on_draw()</text><text x="600" y="170" text-anchor="middle" font-size="12">paint the picture</text>
+<rect x="190" y="215" width="160" height="50" rx="10" fill="#ffe9e6" stroke="#d6452e" stroke-width="2"/><text x="270" y="245" text-anchor="middle" font-size="14">Wait for next frame</text>
+<text x="360" y="305" text-anchor="middle" font-size="13">Repeats about 60 times every second</text></svg><figcaption>The game loop. The library repeats these steps until you close the window.</figcaption></figure>
+<p>Our game uses the <strong>Arcade</strong> library. Arcade runs the loop for us and calls our methods at the right time:</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Method</th><th scope="col">When it runs</th><th scope="col">Its job</th></tr></thead><tbody><tr><td><code>on_update(delta_time)</code></td><td>every frame</td><td>Change the world: move, collide, apply rules</td></tr><tr><td><code>on_draw()</code></td><td>every frame, after update</td><td>Paint everything on the screen</td></tr><tr><td><code>on_key_press(key, mods)</code></td><td>when a key goes down</td><td>React to a key press</td></tr><tr><td><code>on_key_release(key, mods)</code></td><td>when a key comes up</td><td>Stop reacting to a key</td></tr></tbody></table></div>
+<p>The program starts in <code>main.py</code>. It makes a window, shows the menu and hands control to Arcade:</p>
+<figure class="code"><figcaption><span class="file">main.py</span> <span class="lines">lines 9&ndash;13</span> <a class="code-link" data-file="main.py" data-start="9" data-end="13" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> main():
+    placeholder_art.generate_missing()     <span class="t-c"># only creates files that are missing</span>
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    window.show_view(MenuView())
+    arcade.run()</code></pre></figure>
+<p>A <strong>View</strong> is one screen of the game: the menu, the Hangar, the editor, the game itself. <code>show_view</code> swaps which screen is active.</p>
+
+<h2>Delta time: keeping speed fair</h2>
+<p>Computers run at different speeds. If a ship moves 5 pixels per frame, a fast computer (120 frames a second) would make it twice as fast as a slow one.
+The fix is to move by <em>speed &times; time</em>. Arcade tells us how long the last frame took. It is called <code>delta_time</code>, or <code>dt</code> for short.</p>
+<pre class="inline"><code>x = x + speed * dt
+# speed = 300 pixels per second, dt = 1/60 of a second
+# so each frame the ship moves 300 * (1/60) = 5 pixels</code></pre>
+<p>The game also limits <code>dt</code> so that a long pause (like dragging the window) does not cause a huge jump:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">line 461</span> <a class="code-link" data-file="game/game_view.py" data-start="461" data-end="461" href="https://github.com/">View on GitHub</a></figcaption><pre><code>dt = min(delta_time, <span class="t-n">1</span> / <span class="t-n">20</span>)</code></pre></figure>
+
+<h2>What happens inside one update</h2>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 460&ndash;504</span> <a class="code-link" data-file="game/game_view.py" data-start="460" data-end="504" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> on_update(<span class="t-self">self</span>, delta_time):
+    dt = min(delta_time, <span class="t-n">1</span> / <span class="t-n">20</span>)
+    <span class="t-self">self</span>._network_tick(dt)
+    <span class="t-self">self</span>.zoom += (<span class="t-self">self</span>.zoom_target - <span class="t-self">self</span>.zoom) * min(<span class="t-n">1.0</span>, dt * settings.get(<span class="t-s">&quot;world.zoom_speed&quot;</span>))
+    <span class="t-self">self</span>.background.update(dt)
+    <span class="t-k">for</span> e <span class="t-k">in</span> <span class="t-self">self</span>.effects:
+        e[<span class="t-n">3</span>] += dt
+    <span class="t-self">self</span>.effects = [e <span class="t-k">for</span> e <span class="t-k">in</span> <span class="t-self">self</span>.effects <span class="t-k">if</span> e[<span class="t-n">3</span>] &lt; e[<span class="t-n">4</span>]]
+    <span class="t-self">self</span>.notice_timer = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.notice_timer - dt)
+    <span class="t-k">if</span> <span class="t-self">self</span>.state == <span class="t-s">&quot;perk&quot;</span>:
+        <span class="t-self">self</span>._update_perks(dt)
+        <span class="t-k">return</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.state != <span class="t-s">&quot;playing&quot;</span>:
+        <span class="t-k">return</span>
+    <span class="t-self">self</span>.time += dt
+    <span class="t-self">self</span>.banner_timer = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.banner_timer - dt)
+
+    <span class="t-self">self</span>._update_hazards(dt)
+    <span class="t-k">for</span> p <span class="t-k">in</span> <span class="t-self">self</span>.alive_players():
+        p.score += dt * <span class="t-n">10</span>
+        p.weapons.update(dt)
+        ship = p.ship
+        ax, ay = <span class="t-self">self</span>._gravity_on(ship)
+        keys = p.keys
+        pressed = any(k <span class="t-k">in</span> keys <span class="t-k">for</span> k <span class="t-k">in</span> ABILITY_KEYS)
+        <span class="t-k">if</span> pressed <span class="t-k">and</span> <span class="t-k">not</span> p.ability_prev:
+            <span class="t-self">self</span>._try_ability(p)
+        p.ability_prev = pressed
+        up = arcade.key.UP <span class="t-k">in</span> keys
+        ship.update_ship(dt, up, arcade.key.DOWN <span class="t-k">in</span> keys, arcade.key.LEFT <span class="t-k">in</span> keys,
+                         arcade.key.RIGHT <span class="t-k">in</span> keys, ax, ay, <span class="t-self">self</span>.world)
+        <span class="t-self">self</span>._heal_tick(p, dt)
+        p.thrust_cooldown -= dt
+        <span class="t-k">if</span> up <span class="t-k">and</span> ship.speed &gt; <span class="t-n">0</span> <span class="t-k">and</span> p.thrust_cooldown &lt;= <span class="t-n">0</span> <span class="t-k">and</span> p.local:
+            <span class="t-self">self</span>.audio.play(<span class="t-s">&quot;thrust&quot;</span>)
+            p.thrust_cooldown = <span class="t-n">0.3</span>
+        <span class="t-k">if</span> arcade.key.SPACE <span class="t-k">in</span> keys <span class="t-k">and</span> <span class="t-k">not</span> ship.phased:
+            bullets, event = p.weapons.fire(ship, p.dmg_mult)
+            <span class="t-k">for</span> b <span class="t-k">in</span> bullets:
+                b.player_id = p.id
+                <span class="t-self">self</span>.bullet_list.append(b)
+            <span class="t-k">if</span> bullets <span class="t-k">and</span> ship.cloaked <span class="t-k">and</span> <span class="t-k">not</span> bullets[<span class="t-n">0</span>].silent:
+                ship.active = <span class="t-n">0.0</span>                  <span class="t-c"># firing gives away a cloaked ship</span>
+            <span class="t-k">if</span> event:
+                <span class="t-self">self</span>._sfx(event, p.id)</code></pre><p class="code-note">Read the method names. They tell the story: hazards act, each player moves and fires, rocks and aliens move, collisions are checked, and so on.</p></figure>
+<aside class="box tip"><h3>Order matters</h3><p>Hazards are updated <em>before</em> ships, because they change the ship's drift. Collisions are checked <em>after</em> everything has moved. Thinking about the order of steps is a big part of good program design.</p></aside>
+
+<h2>Drawing: the painter's algorithm</h2>
+<p>Computers draw things one after another. Whatever is drawn <strong>last</strong> ends up on top, like layers of paint. So the game draws the background first and the ships last:</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 890&ndash;904</span> <a class="code-link" data-file="game/game_view.py" data-start="890" data-end="904" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> on_draw(<span class="t-self">self</span>):
+    <span class="t-self">self</span>.clear()
+    cx, cy = <span class="t-self">self</span>.world.center
+    <span class="t-self">self</span>.world_camera.position = (cx, cy)
+    <span class="t-self">self</span>.world_camera.zoom = <span class="t-self">self</span>.zoom
+    <span class="t-self">self</span>.world_camera.use()
+    <span class="t-self">self</span>.background.draw()
+    draw_hazards(<span class="t-self">self</span>.hazard_rows(), <span class="t-self">self</span>.time)
+    <span class="t-self">self</span>.wormhole_list.draw()
+    <span class="t-self">self</span>.powerup_list.draw()
+    <span class="t-self">self</span>.rock_list.draw()
+    <span class="t-self">self</span>.freighter_list.draw()
+    <span class="t-self">self</span>.alien_list.draw()
+    <span class="t-self">self</span>.bullet_list.draw()
+    <span class="t-self">self</span>.ship_list.draw()</code></pre></figure>
+<p>There are two <strong>cameras</strong>. The <em>world camera</em> can zoom out so you can see the whole map. The <em>GUI camera</em> never moves, so the score and health bars stay put.</p>
+
+<h2>Events: reacting to keys</h2>
+<p>Pressing a key is an <strong>event</strong>. Arcade calls <code>on_key_press</code> and our code decides what it means. Held keys are kept in a set. The ship's steering code asks if a key is in the set each frame.</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 930&ndash;952</span> <a class="code-link" data-file="game/game_view.py" data-start="930" data-end="952" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> on_key_press(<span class="t-self">self</span>, symbol, modifiers):
+    <span class="t-k">if</span> <span class="t-self">self</span>.state == <span class="t-s">&quot;gameover&quot;</span>:
+        <span class="t-k">if</span> symbol == arcade.key.ENTER:
+            <span class="t-self">self</span>._bank()
+            <span class="t-self">self</span>.new_game()
+            <span class="t-self">self</span>.audio.play_music()
+        <span class="t-k">elif</span> symbol == arcade.key.ESCAPE:
+            <span class="t-self">self</span>._to_menu()
+        <span class="t-k">return</span>
+    <span class="t-k">if</span> symbol == arcade.key.ESCAPE:
+        <span class="t-self">self</span>._to_menu()
+        <span class="t-k">return</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.state == <span class="t-s">&quot;perk&quot;</span>:
+        <span class="t-k">if</span> symbol <span class="t-k">in</span> WEAPON_KEYS <span class="t-k">and</span> WEAPON_KEYS[symbol] &lt;= <span class="t-n">3</span>:
+            <span class="t-self">self</span>._pick_perk(<span class="t-self">self</span>.local, WEAPON_KEYS[symbol])
+        <span class="t-k">return</span>
+    <span class="t-k">if</span> symbol == arcade.key.P:
+        <span class="t-k">if</span> <span class="t-self">self</span>.remote:
+            <span class="t-self">self</span>.notice, <span class="t-self">self</span>.notice_timer = <span class="t-s">&quot;Can&#x27;t pause while another player is connected&quot;</span>, <span class="t-n">2.0</span>
+        <span class="t-k">else</span>:
+            <span class="t-self">self</span>.state = <span class="t-s">&quot;paused&quot;</span> <span class="t-k">if</span> <span class="t-self">self</span>.state == <span class="t-s">&quot;playing&quot;</span> <span class="t-k">else</span> <span class="t-s">&quot;playing&quot;</span>
+    <span class="t-k">elif</span> symbol <span class="t-k">in</span> WEAPON_KEYS:
+        <span class="t-self">self</span>._select_weapon(WEAPON_KEYS[symbol])</code></pre></figure>
+
+<h2>Safe code: <code>try</code> and <code>except</code></h2>
+<p>If a sound file is missing, the game should stay silent, not crash. The audio code wraps risky steps in <code>try</code>/<code>except</code>:</p>
+<figure class="code"><figcaption><span class="file">game/audio.py</span> <span class="lines">lines 34&ndash;42</span> <a class="code-link" data-file="game/audio.py" data-start="34" data-end="42" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> play(<span class="t-self">self</span>, event):
+    sound = <span class="t-self">self</span>._sound(event)
+    <span class="t-k">if</span> sound <span class="t-k">is</span> <span class="t-k">None</span>:
+        <span class="t-k">return</span>
+    volume = settings.get(<span class="t-s">&quot;audio.sfx_volume&quot;</span>, <span class="t-n">0.7</span>) * <span class="t-self">self</span>._entry(event).get(<span class="t-s">&quot;volume&quot;</span>, <span class="t-n">1.0</span>)
+    <span class="t-k">try</span>:
+        arcade.play_sound(sound, volume=volume)
+    <span class="t-k">except</span> Exception:
+        <span class="t-k">pass</span></code></pre></figure>
+
+<aside class="box tryit"><h3>Try it: slow motion</h3><p>In <code>on_update</code>, change <code>dt = min(delta_time, 1 / 20)</code> to <code>dt = min(delta_time, 1 / 20) * 0.3</code>. Play the game. What happens? Why does everything slow down together?</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> About how many frames are drawn each second?</summary><div class="answer">About 60.</div></details><details><summary><strong>2.</strong> Why do we multiply by <code>dt</code> when moving?</summary><div class="answer">So the speed is the same on fast and slow computers.</div></details><details><summary><strong>3.</strong> The game draws the ship after the rocks. What is the result if a ship and a rock overlap?</summary><div class="answer">The ship appears on top, because it was drawn last.</div></details><details><summary><strong>4.</strong> What is the job of <code>on_draw</code>? Should it change the ship's health?</summary><div class="answer">It only paints the picture. The rules (like changing health) belong in <code>on_update</code>.</div></details><details><summary><strong>5.</strong> What is an event? Give an example.</summary><div class="answer">Something that happens that the program can react to, such as a key press.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="inheritance.html">&larr; 4. Inheritance and design</a><a class="next" href="physics.html">6. Physics &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

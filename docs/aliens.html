@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9. Alien AI - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html">8. Ships and credits</a></li><li><a href="aliens.html" aria-current="page">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>9. Alien AI</h1>
+<p class="lede">How seven enemies and a boss make their decisions.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>understand how an enemy can be programmed to make choices (AI)</li><li>see how a finite state machine works</li><li>understand how an alien decides what it can see</li><li>compare different movement strategies</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>describe how three different aliens behave</li><li>explain what 'leading the target' means</li><li>explain how a cloak hides you from an alien</li></ul></div></div>
+
+<h2>What is "AI" in a game?</h2>
+<p>The aliens are not clever like a person. Each follows a small set of rules, and the rules together make it look as if it is thinking. Game programmers call this
+<strong>AI</strong> (artificial intelligence). Your job as a programmer is to choose simple rules that feel interesting to play against.</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Alien</th><th scope="col">From level</th><th scope="col">Health</th><th scope="col">Speed</th><th scope="col">Score</th><th scope="col">Behaviour</th><th scope="col">Tip</th></tr></thead><tbody><tr><td><strong>Drifter</strong></td><td>1</td><td>20</td><td>90</td><td>50</td><td>Wanders along a wavy path. Never shoots.</td><td>Easy points. Watch the wobble.</td></tr><tr><td><strong>Chaser</strong></td><td>2</td><td>30</td><td>170</td><td>100</td><td>Hunts you and tries to ram you. Turns slowly.</td><td>Fly in a circle: it cannot turn fast enough.</td></tr><tr><td><strong>Sniper</strong></td><td>3</td><td>40</td><td>120</td><td>150</td><td>Keeps its distance and fires where you <em>will</em> be.</td><td>Change direction often. It flickers before it fires.</td></tr><tr><td><strong>Swarm</strong></td><td>4</td><td>15</td><td>170</td><td>60</td><td>A group of four that orbit you and fire.</td><td>Shoot them one at a time.</td></tr><tr><td><strong>Seeker</strong></td><td>3</td><td>35</td><td>150</td><td>120</td><td>Patrols until it spots you, even through a cloak.</td><td>Stay far away and it loses you.</td></tr><tr><td><strong>Teleporter</strong></td><td>4</td><td>30</td><td>80</td><td>130</td><td>Blinks next to you and fires a burst.</td><td>Move as it flickers: that is the warning.</td></tr><tr><td><strong>Minelayer</strong></td><td>5</td><td>50</td><td>100</td><td>140</td><td>Drops proximity mines as it patrols.</td><td>Learn where the mines are. They glow red.</td></tr><tr><td><strong>Mothership</strong></td><td>5</td><td>400</td><td>70</td><td>1000</td><td>Boss. Fires patterns and launches chasers.</td><td>Keep moving. Use your strongest weapons.</td></tr></tbody></table></div>
+
+<h2>The shared brain</h2>
+<p>Every alien class inherits the same <code>update_alien</code> method. It does the same three things each frame: find a target, decide what to do, then move.</p>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 73&ndash;90</span> <a class="code-link" data-file="game/aliens.py" data-start="73" data-end="90" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> update_alien(<span class="t-self">self</span>, dt, ctx):
+    <span class="t-self">self</span>.t += dt
+    <span class="t-self">self</span>.target = ctx.nearest_ship(<span class="t-self">self</span>.center_x, <span class="t-self">self</span>.center_y, <span class="t-self">self</span>)
+    <span class="t-k">if</span> <span class="t-self">self</span>.target <span class="t-k">is</span> <span class="t-k">None</span> <span class="t-k">and</span> <span class="t-self">self</span>.needs_target:
+        <span class="t-self">self</span>.wander(dt)
+    <span class="t-k">else</span>:
+        <span class="t-self">self</span>.think(dt, ctx)
+    <span class="t-self">self</span>.center_x += <span class="t-self">self</span>.vx * dt
+    <span class="t-self">self</span>.center_y += <span class="t-self">self</span>.vy * dt
+    ctx.world.wrap(<span class="t-self">self</span>)
+    <span class="t-self">self</span>.ram_cd = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.ram_cd - dt)
+    <span class="t-self">self</span>.flash = max(<span class="t-n">0.0</span>, <span class="t-self">self</span>.flash - dt)
+    <span class="t-k">if</span> <span class="t-self">self</span>.faces_heading <span class="t-k">and</span> (<span class="t-self">self</span>.vx <span class="t-k">or</span> <span class="t-self">self</span>.vy):
+        <span class="t-self">self</span>.angle = ANGLE_SIGN * math.degrees(math.atan2(<span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy))
+    hit_blink = <span class="t-self">self</span>.flash &gt; <span class="t-n">0</span> <span class="t-k">and</span> int(<span class="t-self">self</span>.flash * <span class="t-n">40</span>) % <span class="t-n">2</span> == <span class="t-n">0</span>
+    charge_blink = <span class="t-self">self</span>.charging <span class="t-k">and</span> int(<span class="t-self">self</span>.t * <span class="t-n">20</span>) % <span class="t-n">2</span> == <span class="t-n">0</span>
+    <span class="t-self">self</span>.alpha = <span class="t-n">140</span> <span class="t-k">if</span> (hit_blink <span class="t-k">or</span> charge_blink) <span class="t-k">else</span> <span class="t-n">255</span>
+    <span class="t-self">self</span>.animate(dt)</code></pre></figure>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 66&ndash;71</span> <a class="code-link" data-file="game/aliens.py" data-start="66" data-end="71" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> wander(<span class="t-self">self</span>, dt):
+    <span class="t-s">&quot;&quot;&quot;Nothing to chase (everyone is hidden): drift about aimlessly.&quot;&quot;&quot;</span>
+    <span class="t-self">self</span>.charging = <span class="t-k">False</span>
+    <span class="t-self">self</span>.heading = (<span class="t-self">self</span>.heading + random.uniform(-<span class="t-n">40</span>, <span class="t-n">40</span>) * dt) % <span class="t-n">360</span>
+    rad = math.radians(<span class="t-self">self</span>.heading)
+    <span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy = math.sin(rad) * <span class="t-self">self</span>.speed * <span class="t-n">0.5</span>, math.cos(rad) * <span class="t-self">self</span>.speed * <span class="t-n">0.5</span></code></pre><p class="code-note">If an alien can see nobody, it drifts aimlessly. <code>random.uniform</code> gives a random number in a range.</p></figure>
+
+<h2>What can an alien see?</h2>
+<p>Before an alien thinks, the game asks: <em>which ship can this alien see?</em> A cloaked ship, or one inside a nebula, is invisible unless the alien is very close. The Seeker has special
+long-range sensors.</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 279&ndash;293</span> <a class="code-link" data-file="game/game_view.py" data-start="279" data-end="293" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> nearest_ship(<span class="t-self">self</span>, x, y, alien=<span class="t-k">None</span>):
+    <span class="t-s">&quot;&quot;&quot;Closest ship the alien can see (cloaked / nebula-hidden ships are skipped unless
+    very close). Returns None when it sees nobody.&quot;&quot;&quot;</span>
+    best, best_d = <span class="t-k">None</span>, <span class="t-n">1e18</span>
+    <span class="t-k">for</span> p <span class="t-k">in</span> <span class="t-self">self</span>.alive_players():
+        ship = p.ship
+        dx, dy = <span class="t-self">self</span>.world.delta(x, y, ship.center_x, ship.center_y)
+        d = math.hypot(dx, dy)
+        <span class="t-k">if</span> alien <span class="t-k">is</span> <span class="t-k">not</span> <span class="t-k">None</span> <span class="t-k">and</span> <span class="t-self">self</span>._hidden_from(alien, ship, d):
+            <span class="t-k">continue</span>
+        <span class="t-k">if</span> d &lt; best_d:
+            best, best_d = ship, d
+    <span class="t-k">if</span> best <span class="t-k">is</span> <span class="t-k">None</span> <span class="t-k">and</span> alien <span class="t-k">is</span> <span class="t-k">None</span>:
+        <span class="t-k">return</span> <span class="t-self">self</span>.ref_ship()
+    <span class="t-k">return</span> best</code></pre></figure>
+<figure class="code"><figcaption><span class="file">game/game_features.py</span> <span class="lines">lines 351&ndash;356</span> <a class="code-link" data-file="game/game_features.py" data-start="351" data-end="356" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _hidden_from(<span class="t-self">self</span>, alien, ship, dist):
+    <span class="t-s">&quot;&quot;&quot;Can this alien not see this ship right now?&quot;&quot;&quot;</span>
+    <span class="t-k">if</span> <span class="t-k">not</span> (ship.cloaked <span class="t-k">or</span> ship.in_nebula):
+        <span class="t-k">return</span> <span class="t-k">False</span>
+    reach = alien.detect_range <span class="t-k">or</span> settings.get(<span class="t-s">&quot;hazards.cloak_detect&quot;</span>)
+    <span class="t-k">return</span> dist &gt; reach</code></pre></figure>
+<p>This is a nice example of <strong>returning <code>None</code></strong>: "nothing". If every ship is hidden, <code>nearest_ship</code> gives back <code>None</code>, and the alien <code>wander</code>s.</p>
+
+<h2>Strategy 1: simple pursuit (Chaser)</h2>
+<p>The Chaser turns toward you, but only by a limited amount each second. That "turn limit" is why you can dodge it by circling.</p>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 111&ndash;121</span> <a class="code-link" data-file="game/aliens.py" data-start="111" data-end="121" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> Chaser(Alien):
+    kind = <span class="t-s">&quot;chaser&quot;</span>
+
+    <span class="t-k">def</span> think(<span class="t-self">self</span>, dt, ctx):
+        dx, dy, _ = <span class="t-self">self</span>.to_ship(ctx)
+        wanted = math.degrees(math.atan2(dx, dy))
+        diff = (wanted - <span class="t-self">self</span>.heading + <span class="t-n">180</span>) % <span class="t-n">360</span> - <span class="t-n">180</span>
+        turn = <span class="t-self">self</span>.cfg[<span class="t-s">&quot;turn_rate&quot;</span>] * dt
+        <span class="t-self">self</span>.heading += max(-turn, min(turn, diff))
+        rad = math.radians(<span class="t-self">self</span>.heading)
+        <span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy = math.sin(rad) * <span class="t-self">self</span>.speed, math.cos(rad) * <span class="t-self">self</span>.speed</code></pre></figure>
+
+<h2>Strategy 2: predicting the future (Sniper)</h2>
+<p>If the Sniper aimed at where you <em>are</em>, its shot would miss when you keep moving. So it works out how long the bullet takes to arrive, then aims at where you <em>will be</em>.</p>
+<figure class="diagram"><svg role="img" aria-label="Diagram of an alien aiming ahead of a moving ship" viewBox="0 0 640 220" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar4" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#d6452e"/></marker></defs>
+<circle cx="60" cy="170" r="16" fill="#9a4fd6"/><text x="60" y="205" text-anchor="middle" font-size="13">alien</text>
+<circle cx="300" cy="60" r="16" fill="#2c9a52"/><text x="300" y="38" text-anchor="middle" font-size="13">your ship now</text>
+<line x1="318" y1="60" x2="520" y2="60" stroke="#2c9a52" stroke-width="3" stroke-dasharray="6" marker-end="url(#ar4)"/>
+<circle cx="540" cy="60" r="16" fill="none" stroke="#2c9a52" stroke-width="3" stroke-dasharray="4"/><text x="540" y="38" text-anchor="middle" font-size="13">where you will be</text>
+<line x1="78" y1="165" x2="300" y2="75" stroke="#999" stroke-width="2" stroke-dasharray="3"/><text x="150" y="105" font-size="13" fill="#999">aim here: misses</text>
+<line x1="78" y1="168" x2="525" y2="75" stroke="#d6452e" stroke-width="3" marker-end="url(#ar4)"/><text x="330" y="150" font-size="14" fill="#d6452e">aim here: hits (lead the target)</text></svg><figcaption>Leading the target: aim ahead of a moving ship.</figcaption></figure>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 133&ndash;153</span> <a class="code-link" data-file="game/aliens.py" data-start="133" data-end="153" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> think(<span class="t-self">self</span>, dt, ctx):
+    dx, dy, dist = <span class="t-self">self</span>.to_ship(ctx)
+    ux, uy = (dx / dist, dy / dist) <span class="t-k">if</span> dist <span class="t-k">else</span> (<span class="t-n">0.0</span>, <span class="t-n">1.0</span>)
+    keep = <span class="t-self">self</span>.cfg[<span class="t-s">&quot;keep_distance&quot;</span>]
+    radial = <span class="t-n">1.0</span> <span class="t-k">if</span> dist &gt; keep + <span class="t-n">40</span> <span class="t-k">else</span> -<span class="t-n">1.0</span> <span class="t-k">if</span> dist &lt; keep - <span class="t-n">40</span> <span class="t-k">else</span> <span class="t-n">0.0</span>
+    <span class="t-self">self</span>.strafe_timer -= dt
+    <span class="t-k">if</span> <span class="t-self">self</span>.strafe_timer &lt;= <span class="t-n">0</span>:
+        <span class="t-self">self</span>.strafe, <span class="t-self">self</span>.strafe_timer = -<span class="t-self">self</span>.strafe, random.uniform(<span class="t-n">2</span>, <span class="t-n">4</span>)
+    mx = ux * radial - uy * <span class="t-self">self</span>.strafe * <span class="t-n">0.7</span>
+    my = uy * radial + ux * <span class="t-self">self</span>.strafe * <span class="t-n">0.7</span>
+    <span class="t-self">self</span>.set_velocity_toward(mx, my, <span class="t-self">self</span>.speed)
+    <span class="t-self">self</span>.angle = ANGLE_SIGN * math.degrees(math.atan2(dx, dy))
+
+    <span class="t-self">self</span>.fire_timer -= dt
+    <span class="t-self">self</span>.charging = <span class="t-self">self</span>.fire_timer &lt; <span class="t-n">0.4</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.fire_timer &lt;= <span class="t-n">0</span>:
+        <span class="t-self">self</span>.fire_timer = <span class="t-self">self</span>.cfg[<span class="t-s">&quot;fire_interval&quot;</span>]
+        t = dist / max(<span class="t-n">1.0</span>, <span class="t-self">self</span>.cfg[<span class="t-s">&quot;bullet_speed&quot;</span>])      <span class="t-c"># lead the target</span>
+        svx, svy = <span class="t-self">self</span>.target.velocity()
+        aim = math.degrees(math.atan2(dx + svx * t, dy + svy * t))
+        ctx.fire_alien_bullet(<span class="t-self">self</span>, aim)</code></pre><p class="code-note"><code>t = dist / bullet_speed</code> is the travel time. The ship's velocity multiplied by <code>t</code> tells us how far it will move.</p></figure>
+
+<h2>Strategy 3: a timeline (Teleporter) and state machines</h2>
+<p>Many AIs are <strong>state machines</strong>: the alien is always in one <em>state</em> and changes state when something happens. The Teleporter's states use timers:</p>
+<figure class="diagram"><svg role="img" aria-label="State machine diagram of the Teleporter" viewBox="0 0 700 170" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar5" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#0f7a8a"/></marker></defs>
+<g stroke="#0f7a8a" stroke-width="3" fill="none" marker-end="url(#ar5)"><path d="M190 60 H250"/><path d="M430 60 H490"/><path d="M590 90 V130 H340 V100"/></g>
+<rect x="30" y="30" width="160" height="60" rx="10" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="110" y="56" text-anchor="middle" font-size="14">1. Approach</text><text x="110" y="74" text-anchor="middle" font-size="12">drift toward you</text>
+<rect x="250" y="30" width="180" height="60" rx="10" fill="#fff6dd" stroke="#b86e00" stroke-width="2"/><text x="340" y="56" text-anchor="middle" font-size="14">2. Charge</text><text x="340" y="74" text-anchor="middle" font-size="12">flickers for 0.6 s</text>
+<rect x="490" y="30" width="190" height="60" rx="10" fill="#f1e9ff" stroke="#7a4fd6" stroke-width="2"/><text x="585" y="56" text-anchor="middle" font-size="14">3. Blink + fire</text><text x="585" y="74" text-anchor="middle" font-size="12">teleport, burst of 3</text>
+<text x="350" y="158" text-anchor="middle" font-size="13">then the timer resets and it starts again</text></svg><figcaption>The Teleporter's cycle of states.</figcaption></figure>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 259&ndash;283</span> <a class="code-link" data-file="game/aliens.py" data-start="259" data-end="283" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> think(<span class="t-self">self</span>, dt, ctx):
+    dx, dy, dist = <span class="t-self">self</span>.to_ship(ctx)
+    <span class="t-self">self</span>.set_velocity_toward(dx, dy, <span class="t-self">self</span>.speed <span class="t-k">if</span> dist &gt; <span class="t-n">200</span> <span class="t-k">else</span> <span class="t-n">0.0</span>)
+    <span class="t-self">self</span>.angle = ANGLE_SIGN * math.degrees(math.atan2(dx, dy))
+    <span class="t-self">self</span>.blink_timer -= dt
+    <span class="t-self">self</span>.charging = <span class="t-n">0</span> &lt; <span class="t-self">self</span>.blink_timer &lt; <span class="t-n">0.6</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.blink_timer &lt;= <span class="t-n">0</span>:                  <span class="t-c"># blink to a spot on a ring around the target</span>
+        ang = random.uniform(<span class="t-n">0</span>, <span class="t-n">2</span> * math.pi)
+        ring = float(<span class="t-self">self</span>.cfg[<span class="t-s">&quot;ring&quot;</span>]) * random.uniform(<span class="t-n">0.8</span>, <span class="t-n">1.2</span>)
+        tx, ty = <span class="t-self">self</span>.target.center_x, <span class="t-self">self</span>.target.center_y
+        <span class="t-self">self</span>.center_x = tx + math.sin(ang) * ring
+        <span class="t-self">self</span>.center_y = ty + math.cos(ang) * ring
+        ctx.world.wrap(<span class="t-self">self</span>)
+        ctx.effect_at(<span class="t-self">self</span>.center_x, <span class="t-self">self</span>.center_y, <span class="t-self">self</span>.hit_radius * <span class="t-n">2.5</span>, (<span class="t-n">200</span>, <span class="t-n">120</span>, <span class="t-n">255</span>))
+        ctx.play_sfx(<span class="t-s">&quot;teleporter_blink&quot;</span>)
+        <span class="t-self">self</span>.blink_timer = float(<span class="t-self">self</span>.cfg[<span class="t-s">&quot;blink_interval&quot;</span>]) * random.uniform(<span class="t-n">0.8</span>, <span class="t-n">1.3</span>)
+        <span class="t-self">self</span>.burst_left = int(<span class="t-self">self</span>.cfg[<span class="t-s">&quot;burst_count&quot;</span>])
+        <span class="t-self">self</span>.burst_timer = <span class="t-n">0.3</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.burst_left &gt; <span class="t-n">0</span>:
+        <span class="t-self">self</span>.burst_timer -= dt
+        <span class="t-k">if</span> <span class="t-self">self</span>.burst_timer &lt;= <span class="t-n">0</span>:
+            <span class="t-self">self</span>.burst_left -= <span class="t-n">1</span>
+            <span class="t-self">self</span>.burst_timer = <span class="t-n">0.18</span>
+            dx, dy, _ = <span class="t-self">self</span>.to_ship(ctx)
+            ctx.fire_alien_bullet(<span class="t-self">self</span>, math.degrees(math.atan2(dx, dy)))</code></pre></figure>
+
+<h2>Strategy 4: formations (Swarm)</h2>
+<p>Each ship in a Swarm gets a slot number. Slot 0 orbits at one angle, slot 1 a quarter of the way round, and so on. Together they circle you like a ring:</p>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 164&ndash;176</span> <a class="code-link" data-file="game/aliens.py" data-start="164" data-end="176" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> think(<span class="t-self">self</span>, dt, ctx):
+    c = <span class="t-self">self</span>.cfg
+    ang = math.radians(c[<span class="t-s">&quot;orbit_speed&quot;</span>] * ctx.time + <span class="t-self">self</span>.group_phase
+                       + <span class="t-self">self</span>.slot * <span class="t-n">360.0</span> / <span class="t-self">self</span>.group)
+    dx, dy, dist = <span class="t-self">self</span>.to_ship(ctx)
+    tx = dx + math.sin(ang) * c[<span class="t-s">&quot;orbit_radius&quot;</span>]
+    ty = dy + math.cos(ang) * c[<span class="t-s">&quot;orbit_radius&quot;</span>]
+    <span class="t-self">self</span>.set_velocity_toward(tx, ty, min(<span class="t-self">self</span>.speed, math.hypot(tx, ty) * <span class="t-n">3</span>))
+    <span class="t-self">self</span>.angle = ANGLE_SIGN * math.degrees(math.atan2(dx, dy))
+    <span class="t-self">self</span>.fire_timer -= dt
+    <span class="t-k">if</span> <span class="t-self">self</span>.fire_timer &lt;= <span class="t-n">0</span>:
+        <span class="t-self">self</span>.fire_timer = c[<span class="t-s">&quot;fire_interval&quot;</span>] * random.uniform(<span class="t-n">0.8</span>, <span class="t-n">1.3</span>)
+        ctx.fire_alien_bullet(<span class="t-self">self</span>, math.degrees(math.atan2(dx, dy)))</code></pre></figure>
+
+<h2>Strategy 5: leaving traps (Minelayer)</h2>
+<figure class="code"><figcaption><span class="file">game/aliens.py</span> <span class="lines">lines 286&ndash;301</span> <a class="code-link" data-file="game/aliens.py" data-start="286" data-end="301" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">class</span> Minelayer(Alien):
+    kind = <span class="t-s">&quot;minelayer&quot;</span>
+    needs_target = <span class="t-k">False</span>
+
+    <span class="t-k">def</span> __init__(<span class="t-self">self</span>, *a, **kw):
+        super().__init__(*a, **kw)
+        <span class="t-self">self</span>.drop_timer = float(<span class="t-self">self</span>.cfg[<span class="t-s">&quot;mine_interval&quot;</span>])
+
+    <span class="t-k">def</span> think(<span class="t-self">self</span>, dt, ctx):
+        <span class="t-self">self</span>.heading = (<span class="t-self">self</span>.heading + <span class="t-n">25</span> * math.sin(<span class="t-self">self</span>.t * <span class="t-n">0.7</span>) * dt) % <span class="t-n">360</span>   <span class="t-c"># lazy weave</span>
+        rad = math.radians(<span class="t-self">self</span>.heading)
+        <span class="t-self">self</span>.vx, <span class="t-self">self</span>.vy = math.sin(rad) * <span class="t-self">self</span>.speed, math.cos(rad) * <span class="t-self">self</span>.speed
+        <span class="t-self">self</span>.drop_timer -= dt
+        <span class="t-k">if</span> <span class="t-self">self</span>.drop_timer &lt;= <span class="t-n">0</span>:
+            <span class="t-self">self</span>.drop_timer = float(<span class="t-self">self</span>.cfg[<span class="t-s">&quot;mine_interval&quot;</span>])
+            ctx.drop_alien_mine(<span class="t-self">self</span>)</code></pre></figure>
+<p>The Minelayer does not care about you. It just patrols and drops mines on a timer. The danger is the <em>mines</em>, which are rewarded by the game's collision code.</p>
+
+<aside class="box tryit"><h3>Try it: tune an alien</h3><p>In the Game Editor, find <em>Alien: Chaser</em>. Raise its <em>Turn rate</em> to 360 and play level 2. Is it harder to dodge? Now try making the Sniper's
+<em>Bullet speed</em> very slow. What happens to its aim?</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> What does <code>nearest_ship</code> return when every ship is hidden?</summary><div class="answer"><code>None</code>.</div></details><details><summary><strong>2.</strong> Why does the Sniper aim ahead of your ship?</summary><div class="answer">The bullet takes time to arrive, and your ship moves in that time.</div></details><details><summary><strong>3.</strong> What is a state machine?</summary><div class="answer">A program that is in one state at a time and changes state when something happens.</div></details><details><summary><strong>4.</strong> Why can you dodge a Chaser by flying in a circle?</summary><div class="answer">It can only turn a limited amount each second.</div></details><details><summary><strong>5.</strong> Which alien ignores you completely?</summary><div class="answer">The Minelayer. It patrols and drops mines.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="ships.html">&larr; 8. Ships and credits</a><a class="next" href="rocks-hazards-rules.html">10. Rocks, hazards, rules &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>

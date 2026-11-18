@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8. Ships and credits - Wormhole Runner: learn Python by exploring a game</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="site-config.js" defer></script>
+<script src="assets/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="brand"><a href="index.html">Wormhole Runner</a><span>Learn Python by exploring a real game</span></div>
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="sidenav">Pages</button></header>
+<div class="layout">
+<nav class="side" id="sidenav" aria-label="Pages"><ol><li><a href="index.html">Start here</a></li><li><a href="python-basics.html">1. Python basics</a></li><li><a href="memory-and-data.html">2. Memory and data</a></li><li><a href="classes-and-objects.html">3. Classes and objects</a></li><li><a href="inheritance.html">4. Inheritance and design</a></li><li><a href="game-loop.html">5. The game loop</a></li><li><a href="physics.html">6. Physics</a></li><li><a href="levels-and-world.html">7. Levels and the world</a></li><li><a href="ships.html" aria-current="page">8. Ships and credits</a></li><li><a href="aliens.html">9. Alien AI</a></li><li><a href="rocks-hazards-rules.html">10. Rocks, hazards, rules</a></li><li><a href="going-further.html">11. Going further</a></li><li><a href="web-development.html">12. Web development</a></li><li><a href="tutorial-steps.html">13. Rebuild it: prompts</a></li><li><a href="glossary.html">Glossary</a></li><li><a href="teachers.html">Teacher notes</a></li></ol></nav>
+<main id="main">
+<h1>8. Ships and credits</h1>
+<p class="lede">One class, many ships, and the money system.</p>
+
+<div class="goals"><div class="box learn"><h3>Learning intentions</h3><ul><li>see how ships are described using data instead of lots of code</li><li>understand each ship's ability and how it is checked in code</li><li>understand shields, damage order and the credits economy</li><li>see how weapons are built from a few simple types</li></ul></div><div class="box success"><h3>Success criteria: I can&hellip;</h3><ul><li>explain what makes a ship different from another</li><li>describe the order the game checks before it damages a ship</li><li>explain why credits are saved in a file</li><li>add a new ship to the game by editing the settings</li></ul></div></div>
+
+<h2>Ships are data</h2>
+<p>There is one <code>Ship</code> class, but six different ships. How? Each ship is described by a <strong>dictionary of settings</strong>: name, price, hull strength, speed numbers,
+an ability, and its own weapon. The same class reads those numbers and behaves differently. This idea is called <strong>data-driven design</strong>.</p>
+<figure class="code"><figcaption><span class="file">game/config.py</span> <span class="lines">lines 25&ndash;31</span> <a class="code-link" data-file="game/config.py" data-start="25" data-end="31" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _ship(name, price, desc, graphic, health, speed, accel, turn,
+          ability=<span class="t-k">None</span>, passive=<span class="t-k">None</span>, weapon=<span class="t-k">None</span>):
+    <span class="t-s">&quot;&quot;&quot;A flyable ship. ability: one special move on the ability key (SHIFT);
+    passive: always-on traits (shield bar, regeneration); weapon: the ship&#x27;s own weapon (key 7).&quot;&quot;&quot;</span>
+    <span class="t-k">return</span> {<span class="t-s">&quot;name&quot;</span>: name, <span class="t-s">&quot;price&quot;</span>: price, <span class="t-s">&quot;desc&quot;</span>: desc, <span class="t-s">&quot;graphic&quot;</span>: graphic,
+            <span class="t-s">&quot;health&quot;</span>: health, <span class="t-s">&quot;speed_mult&quot;</span>: speed, <span class="t-s">&quot;accel_mult&quot;</span>: accel, <span class="t-s">&quot;turn_mult&quot;</span>: turn,
+            <span class="t-s">&quot;ability&quot;</span>: ability <span class="t-k">or</span> {}, <span class="t-s">&quot;passive&quot;</span>: passive <span class="t-k">or</span> {}, <span class="t-s">&quot;weapon&quot;</span>: weapon <span class="t-k">or</span> {}}</code></pre><p class="code-note">A small <em>helper function</em> that builds one ship's dictionary. Calling it six times makes six ships.</p></figure>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Ship</th><th scope="col">Price</th><th scope="col">Hull</th><th scope="col">Speed / accel / turn</th><th scope="col">Ability (SHIFT)</th><th scope="col">Own weapon (key 7)</th></tr></thead><tbody><tr><td><strong>Scout</strong></td><td>free</td><td>100</td><td>&times;1.00 / &times;1.00 / &times;1.00</td><td>none</td><td>none</td></tr><tr><td><strong>Phantom</strong></td><td>600</td><td>80</td><td>&times;1.05 / &times;1.00 / &times;1.10</td><td><strong>Cloak</strong>: Invisible to aliens. Firing (except the Silent Bolt) or being hit breaks it.</td><td>Silent Bolt (bolt, 55 damage)</td></tr><tr><td><strong>Skipper</strong></td><td>800</td><td>90</td><td>&times;1.00 / &times;1.15 / &times;1.00</td><td><strong>Hyperjump</strong>: Instantly jump to a random safe position with a moment of protection.</td><td>Jump-blast (pulse, 35 damage)</td></tr><tr><td><strong>Specter</strong></td><td>1000</td><td>85</td><td>&times;1.00 / &times;1.00 / &times;1.00</td><td><strong>Hyperspace</strong>: 3 seconds immune to rocks, aliens and bullets - but you cannot fire or collect.</td><td>Phase Lance (bolt, 28 damage)</td></tr><tr><td><strong>Bulwark</strong></td><td>1200</td><td>130</td><td>&times;0.85 / &times;0.90 / &times;0.85</td><td><strong>Deflect</strong>: Reflect alien bullets and shrug off rocks while active.</td><td>Flak Cannon (bolt, 7 damage)</td></tr><tr><td><strong>Medic</strong></td><td>900</td><td>95</td><td>&times;0.95 / &times;1.00 / &times;1.00</td><td><strong>Repair Burst</strong>: For 3 seconds heal yourself and any ally within range.</td><td>Repair Dart (bolt, 10 damage)</td></tr></tbody></table></div>
+
+<h2>The ability system</h2>
+<p>Every ship has at most one special move, triggered with <strong>SHIFT</strong>. Before it can run, the game checks several conditions. This is a chain of
+<code>if</code> decisions:</p>
+<figure class="diagram"><svg role="img" aria-label="Flowchart of the ability check" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="ar3" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#0f7a8a"/></marker></defs>
+<g stroke="#0f7a8a" stroke-width="3" fill="none" marker-end="url(#ar3)">
+<path d="M130 50 H170"/><path d="M290 50 H330"/><path d="M450 50 H490"/><path d="M610 50 H640 V90"/><path d="M230 80 V140"/><path d="M390 80 V140"/></g>
+<rect x="10" y="25" width="120" height="50" rx="10" fill="#e6f0ff" stroke="#17306b" stroke-width="2"/><text x="70" y="55" text-anchor="middle" font-size="14">SHIFT pressed</text>
+<rect x="170" y="25" width="120" height="50" rx="10" fill="#fff6dd" stroke="#b86e00" stroke-width="2"/><text x="230" y="48" text-anchor="middle" font-size="13">Has an ability?</text><text x="230" y="64" text-anchor="middle" font-size="12">Cooldown over?</text>
+<rect x="330" y="25" width="120" height="50" rx="10" fill="#fff6dd" stroke="#b86e00" stroke-width="2"/><text x="390" y="48" text-anchor="middle" font-size="13">In an ion storm?</text><text x="390" y="64" text-anchor="middle" font-size="12">Phased out?</text>
+<rect x="490" y="25" width="120" height="50" rx="10" fill="#fff6dd" stroke="#b86e00" stroke-width="2"/><text x="550" y="55" text-anchor="middle" font-size="13">Which type?</text>
+<rect x="590" y="90" width="100" height="50" rx="10" fill="#e6f8ec" stroke="#2c9a52" stroke-width="2"/><text x="640" y="120" text-anchor="middle" font-size="13">Run it!</text>
+<rect x="170" y="140" width="120" height="50" rx="10" fill="#ffe9e6" stroke="#d6452e" stroke-width="2"/><text x="230" y="170" text-anchor="middle" font-size="13">NO: do nothing</text>
+<rect x="330" y="140" width="120" height="50" rx="10" fill="#ffe9e6" stroke="#d6452e" stroke-width="2"/><text x="390" y="162" text-anchor="middle" font-size="13">Yes: ability off</text><text x="390" y="178" text-anchor="middle" font-size="12">for now</text>
+<text x="20" y="240" font-size="14">Cloak, Hyperspace, Deflect, Repair: switch on for a few seconds.</text>
+<text x="20" y="264" font-size="14">Hyperjump: move the ship to a random safe place straight away.</text>
+<text x="20" y="288" font-size="14">Then start the cooldown timer.</text></svg><figcaption>The decisions the game makes when SHIFT is pressed.</figcaption></figure>
+<figure class="code"><figcaption><span class="file">game/game_features.py</span> <span class="lines">lines 289&ndash;303</span> <a class="code-link" data-file="game/game_features.py" data-start="289" data-end="303" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _try_ability(<span class="t-self">self</span>, p):
+    ship = p.ship
+    kind = ship.ability_type
+    <span class="t-k">if</span> <span class="t-k">not</span> kind <span class="t-k">or</span> ship.ability_cd &gt; <span class="t-n">0</span> <span class="t-k">or</span> ship.jammed <span class="t-k">or</span> ship.phased:
+        <span class="t-k">if</span> kind <span class="t-k">and</span> ship.jammed:
+            <span class="t-self">self</span>.notice, <span class="t-self">self</span>.notice_timer = <span class="t-s">&quot;Ion storm - ability offline&quot;</span>, <span class="t-n">1.5</span>
+        <span class="t-k">return</span>
+    a = ship.ability
+    <span class="t-k">if</span> kind == <span class="t-s">&quot;hyperjump&quot;</span>:
+        <span class="t-self">self</span>._hyperjump(p)
+    <span class="t-k">else</span>:
+        ship.active = float(a.get(<span class="t-s">&quot;duration&quot;</span>, <span class="t-n">3.0</span>))
+        <span class="t-self">self</span>._add_effect(ship.center_x, ship.center_y, <span class="t-n">70</span>, <span class="t-n">0.5</span>, (<span class="t-n">150</span>, <span class="t-n">220</span>, <span class="t-n">255</span>))
+    ship.ability_cd = max(float(a[<span class="t-s">&quot;cooldown&quot;</span>]) * p.cd_mult, ship.active)
+    <span class="t-self">self</span>._sfx(<span class="t-s">f&quot;</span><span class="t-s">ability_</span>{kind}<span class="t-s">&quot;</span>, p.id)</code></pre><p class="code-note">Notice the first <code>if</code> uses <code>or</code> to join four conditions. Any one of them being true stops the ability.</p></figure>
+<p>Timed abilities such as the Cloak are stored as a countdown called <code>active</code>. The ship's properties check that countdown, so the rest of the game can simply ask
+<code>ship.cloaked</code> or <code>ship.phased</code>:</p>
+<figure class="code"><figcaption><span class="file">game/sprites.py</span> <span class="lines">lines 97&ndash;103</span> <a class="code-link" data-file="game/sprites.py" data-start="97" data-end="103" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _on(<span class="t-self">self</span>, kind):
+    <span class="t-k">return</span> <span class="t-self">self</span>.ability_type == kind <span class="t-k">and</span> <span class="t-self">self</span>.active &gt; <span class="t-n">0</span>
+
+cloaked = property(<span class="t-k">lambda</span> <span class="t-self">self</span>: <span class="t-self">self</span>._on(<span class="t-s">&quot;cloak&quot;</span>))
+phased = property(<span class="t-k">lambda</span> <span class="t-self">self</span>: <span class="t-self">self</span>._on(<span class="t-s">&quot;hyperspace&quot;</span>))
+deflecting = property(<span class="t-k">lambda</span> <span class="t-self">self</span>: <span class="t-self">self</span>._on(<span class="t-s">&quot;deflect&quot;</span>))
+healing = property(<span class="t-k">lambda</span> <span class="t-self">self</span>: <span class="t-self">self</span>._on(<span class="t-s">&quot;repair&quot;</span>))</code></pre></figure>
+<h3>Hyperjump: searching for a safe place</h3>
+<p>The Skipper jumps to a random spot. But landing inside a rock would be unfair. So the code <strong>tries a random place, tests it, and tries again</strong> (up to 60 times):</p>
+<figure class="code"><figcaption><span class="file">game/game_features.py</span> <span class="lines">lines 305&ndash;336</span> <a class="code-link" data-file="game/game_features.py" data-start="305" data-end="336" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _hyperjump(<span class="t-self">self</span>, p):
+    ship = p.ship
+    <span class="t-self">self</span>._add_effect(ship.center_x, ship.center_y, <span class="t-n">90</span>, <span class="t-n">0.5</span>, (<span class="t-n">200</span>, <span class="t-n">160</span>, <span class="t-n">255</span>))
+    best = <span class="t-k">None</span>
+    <span class="t-k">for</span> _ <span class="t-k">in</span> range(<span class="t-n">60</span>):
+        x, y = <span class="t-self">self</span>.world.random_pos()
+        ok = <span class="t-k">True</span>
+        <span class="t-k">for</span> rock <span class="t-k">in</span> <span class="t-self">self</span>.rock_list:
+            dx, dy = <span class="t-self">self</span>.world.delta(x, y, rock.center_x, rock.center_y)
+            <span class="t-k">if</span> math.hypot(dx, dy) &lt; rock.hit_radius + <span class="t-n">130</span>:
+                ok = <span class="t-k">False</span>
+                <span class="t-k">break</span>
+        <span class="t-k">if</span> ok:
+            <span class="t-k">for</span> al <span class="t-k">in</span> <span class="t-self">self</span>.alien_list:
+                dx, dy = <span class="t-self">self</span>.world.delta(x, y, al.center_x, al.center_y)
+                <span class="t-k">if</span> math.hypot(dx, dy) &lt; <span class="t-n">220</span>:
+                    ok = <span class="t-k">False</span>
+                    <span class="t-k">break</span>
+        <span class="t-k">if</span> ok:
+            <span class="t-k">for</span> hz <span class="t-k">in</span> <span class="t-self">self</span>.hazards:
+                <span class="t-k">if</span> hz.kind == <span class="t-s">&quot;blackhole&quot;</span>:
+                    dx, dy = <span class="t-self">self</span>.world.delta(x, y, hz.x, hz.y)
+                    <span class="t-k">if</span> math.hypot(dx, dy) &lt; hz.radius * <span class="t-n">0.5</span>:
+                        ok = <span class="t-k">False</span>
+                        <span class="t-k">break</span>
+        best = (x, y)
+        <span class="t-k">if</span> ok:
+            <span class="t-k">break</span>
+    ship.center_x, ship.center_y = best
+    ship.drift_x = ship.drift_y = <span class="t-n">0.0</span>
+    ship.grace_timer = max(ship.grace_timer, <span class="t-n">1.0</span>)
+    <span class="t-self">self</span>._add_effect(ship.center_x, ship.center_y, <span class="t-n">90</span>, <span class="t-n">0.5</span>, (<span class="t-n">200</span>, <span class="t-n">160</span>, <span class="t-n">255</span>))</code></pre><p class="code-note">A <code>for</code> loop with an <code>ok</code> flag. <code>break</code> leaves the loop as soon as a good spot is found.</p></figure>
+
+<h2>Taking damage: the order of checks</h2>
+<p>When something hurts a ship, the game asks questions in a careful order. A Specter in hyperspace takes <em>no</em> damage. The Bulwark's shield soaks up damage <em>before</em> the hull does.</p>
+<figure class="code"><figcaption><span class="file">game/game_view.py</span> <span class="lines">lines 561&ndash;592</span> <a class="code-link" data-file="game/game_view.py" data-start="561" data-end="592" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _damage_player(<span class="t-self">self</span>, p, amount, from_x, from_y):
+    ship = p.ship
+    <span class="t-k">if</span> <span class="t-k">not</span> p.alive <span class="t-k">or</span> ship.phased <span class="t-k">or</span> ship.shield_timer &gt; <span class="t-n">0</span> <span class="t-k">or</span> ship.grace_timer &gt; <span class="t-n">0</span>:
+        <span class="t-k">return</span> <span class="t-k">False</span>
+    ship.since_hit = <span class="t-n">0.0</span>
+    <span class="t-k">if</span> ship.cloaked:
+        ship.active = <span class="t-n">0.0</span>
+    dx, dy = <span class="t-self">self</span>.world.delta(from_x, from_y, ship.center_x, ship.center_y)
+    d = math.hypot(dx, dy)
+    <span class="t-k">if</span> ship.shield_max &gt; <span class="t-n">0</span> <span class="t-k">and</span> ship.shield_hp &gt; <span class="t-n">0</span>:      <span class="t-c"># rechargeable shield soaks it up</span>
+        absorbed = min(ship.shield_hp, amount)
+        ship.shield_hp -= absorbed
+        amount -= absorbed
+        ship.shield_wait = ship.shield_delay
+        <span class="t-self">self</span>._sfx(<span class="t-s">&quot;shield_hit&quot;</span>, p.id)
+        <span class="t-k">if</span> amount &lt;= <span class="t-n">0.01</span>:
+            ship.grace_timer = <span class="t-n">0.4</span>
+            <span class="t-k">return</span> <span class="t-k">True</span>
+    ship.health -= amount
+    ship.grace_timer = settings.get(<span class="t-s">&quot;ship.grace_time&quot;</span>)
+    <span class="t-k">if</span> d &gt; <span class="t-n">0</span>:                                   <span class="t-c"># knock the ship away</span>
+        ship.drift_x += dx / d * <span class="t-n">220</span>
+        ship.drift_y += dy / d * <span class="t-n">220</span>
+    <span class="t-self">self</span>._sfx(<span class="t-s">&quot;crash&quot;</span>, p.id)
+    <span class="t-k">if</span> ship.health &lt;= <span class="t-n">0</span>:
+        ship.health = <span class="t-n">0</span>
+        p.alive = <span class="t-k">False</span>
+        ship.remove_from_sprite_lists()
+        <span class="t-self">self</span>._add_effect(ship.center_x, ship.center_y, <span class="t-n">90</span>, <span class="t-n">0.8</span>, (<span class="t-n">255</span>, <span class="t-n">120</span>, <span class="t-n">60</span>))
+        <span class="t-k">if</span> <span class="t-k">not</span> <span class="t-self">self</span>.alive_players():
+            <span class="t-self">self</span>._game_over()
+    <span class="t-k">return</span> <span class="t-k">True</span></code></pre></figure>
+<ol>
+<li>Is the ship dead, phased out, invincible (power-up) or in its short grace period? Then <strong>no damage</strong>. The function returns <code>False</code>.</li>
+<li>If the ship has a shield with energy left, the shield absorbs the damage first.</li>
+<li>Any damage left over reduces the hull. If the hull reaches 0, the ship is destroyed.</li>
+</ol>
+
+<h2>Weapons</h2>
+<p>All the weapons come from four simple <em>types</em>. The <code>type</code> setting decides which code runs:</p>
+<ul>
+<li><strong>bolt</strong>: a shot that flies straight. (A shotgun is just several bolts at slightly different angles.)</li>
+<li><strong>homing</strong>: a bolt that steers toward a target.</li>
+<li><strong>mine</strong>: stays where it is and explodes after a fuse, or when something comes close.</li>
+<li><strong>pulse</strong>: an instant explosion around the ship.</li>
+</ul>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Key</th><th scope="col">Weapon</th><th scope="col">Type</th><th scope="col">Damage</th><th scope="col">Delay</th><th scope="col">Ammo</th><th scope="col">Unlocks at level</th></tr></thead><tbody><tr><td>1</td><td><strong>Blaster</strong></td><td>bolt</td><td>10</td><td>0.25s</td><td>unlimited</td><td>1</td></tr><tr><td>2</td><td><strong>Spread</strong></td><td>bolt</td><td>8</td><td>0.5s</td><td>30</td><td>1</td></tr><tr><td>3</td><td><strong>Rapid</strong></td><td>bolt</td><td>4</td><td>0.08s</td><td>150</td><td>2</td></tr><tr><td>4</td><td><strong>Missile</strong></td><td>homing</td><td>25</td><td>0.9s</td><td>8</td><td>3</td></tr><tr><td>5</td><td><strong>Laser</strong></td><td>bolt</td><td>15</td><td>0.6s</td><td>20</td><td>4</td></tr><tr><td>6</td><td><strong>Mine</strong></td><td>mine</td><td>40</td><td>1.0s</td><td>6</td><td>5</td></tr></tbody></table></div>
+<figure class="code"><figcaption><span class="file">game/weapons.py</span> <span class="lines">lines 109&ndash;153</span> <a class="code-link" data-file="game/weapons.py" data-start="109" data-end="153" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> fire(<span class="t-self">self</span>, ship, dmg_mult=<span class="t-n">1.0</span>):
+    <span class="t-s">&quot;&quot;&quot;Return (bullets, sound_event). Nothing is fired while cooling down.&quot;&quot;&quot;</span>
+    c = <span class="t-self">self</span>.cfg(<span class="t-self">self</span>.slot)
+    <span class="t-k">if</span> <span class="t-self">self</span>.cooldown &gt; <span class="t-n">0</span> <span class="t-k">or</span> <span class="t-k">not</span> c:
+        <span class="t-k">return</span> [], <span class="t-k">None</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.ammo[<span class="t-self">self</span>.slot] == <span class="t-n">0</span>:
+        <span class="t-self">self</span>.cooldown = <span class="t-n">0.3</span>
+        <span class="t-k">return</span> [], <span class="t-s">&quot;no_ammo&quot;</span>
+    <span class="t-k">if</span> <span class="t-self">self</span>.ammo[<span class="t-self">self</span>.slot] &gt; <span class="t-n">0</span>:
+        <span class="t-self">self</span>.ammo[<span class="t-self">self</span>.slot] -= <span class="t-n">1</span>
+    <span class="t-self">self</span>.cooldown = c[<span class="t-s">&quot;cooldown&quot;</span>]
+
+    graphic = c.get(<span class="t-s">&quot;graphic&quot;</span>) <span class="t-k">or</span> <span class="t-s">f&quot;</span><span class="t-s">bullet_w</span>{<span class="t-self">self</span>.slot}<span class="t-s">&quot;</span>
+    damage = c[<span class="t-s">&quot;damage&quot;</span>] * dmg_mult
+    rad = math.radians(ship.bearing)
+    dx, dy = math.sin(rad), math.cos(rad)
+    nose = ship.hit_radius + <span class="t-n">14</span>
+    svx, svy = ship.velocity()
+    bullets = []
+    <span class="t-k">if</span> c[<span class="t-s">&quot;type&quot;</span>] == <span class="t-s">&quot;pulse&quot;</span>:                 <span class="t-c"># instant blast centred on the ship</span>
+        pulse = Bullet(graphic, <span class="t-s">&quot;player&quot;</span>, ship.center_x, ship.center_y, <span class="t-n">0.0</span>, <span class="t-n">0.0</span>,
+                       damage, <span class="t-n">999.0</span>, kind=<span class="t-s">&quot;mine&quot;</span>, blast=c[<span class="t-s">&quot;blast_radius&quot;</span>], fuse=<span class="t-n">0.0</span>)
+        pulse.arm = <span class="t-n">0.0</span>
+        bullets.append(pulse)
+    <span class="t-k">elif</span> c[<span class="t-s">&quot;type&quot;</span>] == <span class="t-s">&quot;mine&quot;</span>:
+        bullets.append(Bullet(graphic, <span class="t-s">&quot;player&quot;</span>,
+                              ship.center_x - dx * (nose + <span class="t-n">16</span>), ship.center_y - dy * (nose + <span class="t-n">16</span>),
+                              <span class="t-n">0.0</span>, <span class="t-n">0.0</span>, damage, <span class="t-n">999.0</span>, kind=<span class="t-s">&quot;mine&quot;</span>,
+                              blast=c[<span class="t-s">&quot;blast_radius&quot;</span>], fuse=c[<span class="t-s">&quot;fuse&quot;</span>]))
+    <span class="t-k">else</span>:
+        n = max(<span class="t-n">1</span>, int(c[<span class="t-s">&quot;count&quot;</span>]))
+        speed = max(<span class="t-n">1.0</span>, c[<span class="t-s">&quot;speed&quot;</span>])
+        <span class="t-k">for</span> i <span class="t-k">in</span> range(n):
+            off = <span class="t-n">0.0</span> <span class="t-k">if</span> n == <span class="t-n">1</span> <span class="t-k">else</span> -c[<span class="t-s">&quot;spread&quot;</span>] / <span class="t-n">2</span> + c[<span class="t-s">&quot;spread&quot;</span>] * i / (n - <span class="t-n">1</span>)
+            r = math.radians(ship.bearing + off)
+            bx, by = math.sin(r), math.cos(r)
+            bullets.append(Bullet(
+                graphic, <span class="t-s">&quot;player&quot;</span>, ship.center_x + bx * nose, ship.center_y + by * nose,
+                bx * speed + svx, by * speed + svy, damage, c[<span class="t-s">&quot;range&quot;</span>] / speed,
+                pierce=c[<span class="t-s">&quot;pierce&quot;</span>], kind=<span class="t-s">&quot;homing&quot;</span> <span class="t-k">if</span> c[<span class="t-s">&quot;type&quot;</span>] == <span class="t-s">&quot;homing&quot;</span> <span class="t-k">else</span> <span class="t-s">&quot;bolt&quot;</span>,
+                turn_rate=c[<span class="t-s">&quot;turn_rate&quot;</span>]))
+    <span class="t-k">for</span> b <span class="t-k">in</span> bullets:
+        b.heal = c.get(<span class="t-s">&quot;heal&quot;</span>, <span class="t-n">0</span>)
+        b.silent = bool(c.get(<span class="t-s">&quot;silent&quot;</span>, <span class="t-k">False</span>))
+    <span class="t-k">return</span> bullets, c.get(<span class="t-s">&quot;sound&quot;</span>)</code></pre><p class="code-note">A good example of <code>if</code> / <code>elif</code> choosing between weapon types, and a <code>for</code> loop creating several bullets for a spread.</p></figure>
+
+<h2>Credits: the in-game money</h2>
+<p>Credits exist <em>only inside the game</em>. They are not real money and you can never buy them. You earn them by playing. Then you spend them in the Hangar.</p>
+<div class="tablewrap"><table class=""><thead><tr><th scope="col">Earn credits for&hellip;</th><th scope="col">Amount</th></tr></thead><tbody><tr><td>alien factor</td><td>0.2</td></tr><tr><td>rock per size</td><td>2</td></tr><tr><td>gold rock</td><td>30</td></tr><tr><td>powerup</td><td>5</td></tr><tr><td>crystal</td><td>8</td></tr><tr><td>rescue</td><td>25</td></tr><tr><td>level clear</td><td>20</td></tr><tr><td>objective</td><td>30</td></tr></tbody></table></div>
+<p>Your credits and the ships you own are saved in a file called <code>profile.json</code>, so they are still there next time. Buying is a short function with a decision in it:</p>
+<figure class="code"><figcaption><span class="file">game/profile.py</span> <span class="lines">lines 47&ndash;57</span> <a class="code-link" data-file="game/profile.py" data-start="47" data-end="57" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> buy(<span class="t-self">self</span>, ship_id):
+    <span class="t-s">&quot;&quot;&quot;Buy a ship. Returns True if it was bought (or already owned).&quot;&quot;&quot;</span>
+    <span class="t-k">if</span> ship_id <span class="t-k">in</span> <span class="t-self">self</span>.owned:
+        <span class="t-k">return</span> <span class="t-k">True</span>
+    price = int(settings.get(<span class="t-s">f&quot;</span><span class="t-s">ships.</span>{ship_id}<span class="t-s">.price</span><span class="t-s">&quot;</span>, <span class="t-n">10</span> ** <span class="t-n">9</span>))
+    <span class="t-k">if</span> <span class="t-self">self</span>.credits &lt; price:
+        <span class="t-k">return</span> <span class="t-k">False</span>
+    <span class="t-self">self</span>.credits -= price
+    <span class="t-self">self</span>.owned.append(ship_id)
+    <span class="t-self">self</span>.save()
+    <span class="t-k">return</span> <span class="t-k">True</span></code></pre></figure>
+<p>The earnings are added with <code>_earn</code>. Perks such as <em>Scavenger</em> multiply the amount:</p>
+<figure class="code"><figcaption><span class="file">game/game_features.py</span> <span class="lines">lines 49&ndash;52</span> <a class="code-link" data-file="game/game_features.py" data-start="49" data-end="52" href="https://github.com/">View on GitHub</a></figcaption><pre><code><span class="t-k">def</span> _earn(<span class="t-self">self</span>, pid, amount):
+    <span class="t-k">for</span> p <span class="t-k">in</span> <span class="t-self">self</span>.players:
+        <span class="t-k">if</span> p.id == pid:
+            p.credits_run += amount * p.credit_mult</code></pre></figure>
+
+<aside class="box tryit"><h3>Try it: make your own ship</h3><p>Open <code>game/config.py</code> and find the <code>"medic"</code> entry inside <code>"ships"</code>. Copy the whole entry, paste it below, and change <code>"medic"</code> to
+<code>"tinker"</code> and the <code>"Medic"</code> name to <code>"Tinker"</code>. Change the health, price and the ability numbers. Run the game and open the Hangar. Your new ship is there! Why did we not need to change any
+other code?</p></aside>
+
+<section class="check"><h2>Check your understanding</h2><details><summary><strong>1.</strong> Why can one <code>Ship</code> class make six different ships?</summary><div class="answer">Each ship's numbers and abilities come from a settings dictionary, so the same code gives different results.</div></details><details><summary><strong>2.</strong> What does <code>or</code> do in an <code>if</code> condition?</summary><div class="answer">The whole condition is true if <em>any</em> part is true.</div></details><details><summary><strong>3.</strong> A Bulwark with 30 shield energy takes 40 damage. How much reaches the hull?</summary><div class="answer">10. The shield absorbs 30 first.</div></details><details><summary><strong>4.</strong> Why does the hyperjump code try up to 60 times?</summary><div class="answer">A random spot might be next to a rock or alien. It keeps trying until it finds a safe one.</div></details><details><summary><strong>5.</strong> Where are your credits saved, and why?</summary><div class="answer">In <code>profile.json</code>, so they are remembered after you close the game.</div></details></section>
+
+<nav class="pager" aria-label="Previous and next page"><a class="prev" href="levels-and-world.html">&larr; 7. Levels and the world</a><a class="next" href="aliens.html">9. Alien AI &rarr;</a></nav>
+</main>
+</div>
+<footer><p>Wormhole Runner learning site. Written for Years 9&ndash;10 in Aotearoa New Zealand. Code links open the project on GitHub.</p></footer>
+</body>
+</html>
