@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wormhole Runner | Digital Technologies Portfolio & Teaching Resource</title>
+  <meta name="description" content="New Zealand Digital Technologies teaching portfolio and Python game development project brief for Wormhole Runner." />
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-secondary: #131a2a;
+      --bg-card: #1a2336;
+      --bg-card-hover: #212c44;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-teal: #2dd4bf;
+      --accent-purple: #a855f7;
+      --accent-amber: #fbbf24;
+      --border-color: #29354d;
+      --font-sans: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      --font-mono: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+
+    a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: var(--accent-teal);
+    }
+
+    /* Navigation */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 15, 25, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .nav-container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      color: #0b0f19;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      color: var(--text-primary);
+    }
+
+    /* Hero Section */
+    .hero {
+      background: radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.14), transparent 45%),
+                  radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.14), transparent 45%),
+                  var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 4.5rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 2.5rem;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-teal);
+      background: rgba(45, 212, 191, 0.1);
+      border: 1px solid rgba(45, 212, 191, 0.3);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 1.75rem;
+      max-width: 62ch;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.35rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent-cyan);
+      color: #0b0f19;
+    }
+
+    .btn-primary:hover {
+      background: #7dd3fc;
+      color: #0b0f19;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-primary);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Educator Card */
+    .educator-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .educator-card h2 {
+      font-size: 1.15rem;
+      margin-bottom: 0.35rem;
+      color: var(--text-primary);
+    }
+
+    .educator-role {
+      font-size: 0.9rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .educator-card p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tag {
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-cyan);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
+    /* Sections */
+    section {
+      padding: 4rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-header p {
+      color: var(--text-secondary);
+      max-width: 70ch;
+    }
+
+    /* Cards & Grids */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+    }
+
+    .card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 0.65rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .card p {
+      color: var(--text-secondary);
+      font-size: 0.94rem;
+      margin-bottom: 1rem;
+    }
+
+    .card ul {
+      list-style: none;
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+    }
+
+    .card ul li {
+      padding-left: 1.25rem;
+      position: relative;
+      margin-bottom: 0.45rem;
+    }
+
+    .card ul li::before {
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: var(--accent-teal);
+      font-weight: bold;
+    }
+
+    .file-path {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-amber);
+      background: rgba(251, 191, 36, 0.1);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    /* Curriculum Table */
+    .table-wrapper {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--bg-card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.93rem;
+    }
+
+    th, td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    th {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    td {
+      color: var(--text-secondary);
+    }
+
+    td strong {
+      color: var(--text-primary);
+    }
+
+    /* Repo Tree */
+    .repo-tree {
+      background: #080b12;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      overflow-x: auto;
+    }
+
+    .repo-tree a {
+      color: var(--accent-cyan);
+    }
+
+    .repo-tree a:hover {
+      text-decoration: underline;
+    }
+
+    .tree-comment {
+      color: #64748b;
+    }
+
+    /* Footer */
+    footer {
+      padding: 2.5rem 1.5rem;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .footer-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 840px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header & Repository Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="./index.html" class="brand">
+        <span class="brand-badge">PY // DT</span>
+        <span>Python_WormholeRunner</span>
+      </a>
+      <nav aria-label="Primary Navigation">
+        <ul>
+          <li><a href="#portfolio">Educator Profile</a></li>
+          <li><a href="#specifications">Project Brief</a></li>
+          <li><a href="#curriculum">NZ Curriculum</a></li>
+          <li><a href="#docs-hub">Docs &amp; Guides</a></li>
+          <li><a href="#source-nav">Source Tree</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="portfolio">
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow">Aotearoa New Zealand &bull; Digital Technologies</span>
+          <h1>Wormhole Runner: Python Game Architecture &amp; Teaching Exemplar</h1>
+          <p>
+            A classroom-ready Python arcade game project designed to scaffold senior secondary learners from structured procedural code to modular, event-driven software engineering.
+          </p>
+          <div class="cta-group">
+            <a href="./docs/index.html" class="btn btn-primary">Launch Documentation Portal (docs/index.html) &rarr;</a>
+            <a href="https://github.com/GrahamPearl/Python_WormholeRunner" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">View GitHub Repository</a>
+          </div>
+        </div>
+
+        <aside class="educator-card" aria-label="Educator Portfolio Summary">
+          <h2>Graham Pearl</h2>
+          <span class="educator-role">Digital Technologies &amp; Computer Science Educator</span>
+          <p>
+            Curriculum designer and secondary specialist focused on Computational Thinking, Python software development, and authentic assessment pathways aligned with the New Zealand Curriculum (NZC) and NCEA Level 1–3 Digital Technologies standards.
+          </p>
+          <div class="tag-list">
+            <span class="tag">Python 3</span>
+            <span class="tag">NZC Progress Outcomes</span>
+            <span class="tag">NCEA AS 92004 / 91896</span>
+            <span class="tag">Game Loops &amp; State</span>
+            <span class="tag">Git &amp; Docs</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Project Specifications for Students -->
+  <section id="specifications">
+    <div class="container">
+      <div class="section-header">
+        <h2>Student Project Specifications</h2>
+        <p>
+          <strong>Brief:</strong> Design, develop, and test an interactive 2D endless-runner / spatial navigation game in Python where the player pilots a vessel through destabilising wormhole hazards, managing velocity, collision boundaries, and progressive difficulty.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <article class="card">
+          <h3>Core Gameplay Mechanics</h3>
+          <p>Foundational systems required for a Minimum Viable Product (MVP):</p>
+          <ul>
+            <li><strong>Real-Time Game Loop:</strong> Fixed-timestep frame updates handling input polling, state transitions, and screen rendering.</li>
+            <li><strong>Player Kinematics:</strong> Responsive directional movement with boundary clamping and smooth velocity control.</li>
+            <li><strong>Dynamic Obstacles:</strong> Procedural spawning of wormhole walls, debris, or energy gates with scaling speed.</li>
+            <li><strong>Collision &amp; Scoring:</strong> Bounding-box or distance-based hit detection, lives/shield tracking, and live score counters.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Technical &amp; Code Standards</h3>
+          <p>Software engineering conventions expected in student submissions:</p>
+          <ul>
+            <li><strong>Modular Decomposition:</strong> Separation of game configuration, entity logic, rendering, and main execution loop.</li>
+            <li><strong>Data Structures:</strong> Effective use of lists, dictionaries, or classes to manage active hazards and player state.</li>
+            <li><strong>Readable Conventions:</strong> PEP 8 naming, descriptive docstrings, and meaningful inline comments explaining logic.</li>
+            <li><strong>Version Control:</strong> Incremental commits tracking feature branches, bug fixes, and refactoring milestones.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h3>Testing &amp; Extension Pathways</h3>
+          <p>Iterative validation and stretch goals for Merit/Excellence outcomes:</p>
+          <ul>
+            <li><strong>Triangulated Testing:</strong> Documented test cases covering expected, boundary, and invalid user inputs.</li>
+            <li><strong>State Management:</strong> Clean transitions across Start Menu, Active Play, Pause, and Game Over screens.</li>
+            <li><strong>Persistent High Scores:</strong> File I/O (JSON/CSV) to save and retrieve leaderboard records across sessions.</li>
+            <li><strong>Audio &amp; Visual Feedback:</strong> Particle trails, screen shake, and sound effects triggered by game events.</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- New Zealand Curriculum Alignment -->
+  <section id="curriculum">
+    <div class="container">
+      <div class="section-header">
+        <h2>New Zealand Curriculum &amp; NCEA Alignment</h2>
+        <p>
+          Mapped to the Technology Learning Area strands—<strong>Computational Thinking for Digital Technologies (CTDT)</strong> and <strong>Designing and Developing Digital Outcomes (DDDO)</strong>—supporting progression into NCEA Levels 1–3.
+        </p>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Curriculum Strand / Level</th>
+              <th>Learning Objectives &amp; Achievement Focus</th>
+              <th>Application in Wormhole Runner</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CTDT Progress Outcomes 5–6</strong><br>(NZC Levels 5–6)</td>
+              <td>Decompose complex problems into reusable modules; design algorithms using sequence, selection, and iteration; evaluate algorithm efficiency.</td>
+              <td>Structuring the frame update cycle, procedural obstacle generation, and collision-checking algorithms.</td>
+            </tr>
+            <tr>
+              <td><strong>DDDO Progress Outcomes 4–5</strong><br>(NZC Levels 5–6)</td>
+              <td>Follow an iterative design process; apply usability heuristics and accessibility principles; test and debug outcomes for fitness of purpose.</td>
+              <td>Designing clear HUD typography, responsive controls, difficulty curves, and structured user-testing logs.</td>
+            </tr>
+            <tr>
+              <td><strong>NCEA Level 1 Digital Technologies</strong><br>(AS 92004 / AS 92005)</td>
+              <td>Create a computer program using variables, collections, conditionals, loops, and functions; develop a fit-for-purpose digital outcome.</td>
+              <td>Building the core Python game engine, managing active obstacle collections, and validating user input handling.</td>
+            </tr>
+            <tr>
+              <td><strong>NCEA Level 2–3 Computer Science</strong><br>(AS 91896 / AS 91906)</td>
+              <td>Use advanced programming techniques (classes/objects, multi-dimensional data, external file handling) and structured software design.</td>
+              <td>Refactoring entities into OOP classes, implementing persistent JSON high-score tables, and modularising packages.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Documentation Hub (docs/ directory) -->
+  <section id="docs-hub">
+    <div class="container">
+      <div class="section-header">
+        <h2>Documentation &amp; Teaching Resources (<code>/docs</code>)</h2>
+        <p>
+          Direct access to the static documentation site and supporting classroom guides stored in the repository's <code>docs/</code> folder.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="file-path">docs/index.html</span>
+          <h3>Main Documentation Portal</h3>
+          <p>
+            The primary documentation landing hub hosting full game walkthroughs, setup guides, architecture breakdowns, and student reference materials.
+          </p>
+          <a href="./docs/index.html" class="card-link">Open docs/index.html &rarr;</a>
+        </div>
+
+        <div class="card">
+          <span class="file-path">docs/ (Directory &amp; Assets)</span>
+          <h3>Supplementary Guides &amp; Reference Files</h3>
+          <p>
+            Browse supplementary Markdown guides, UML/architecture diagrams, student worksheets, and assessment rubrics inside the <code>docs/</code> folder.
+          </p>
+          <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
+            <a href="./docs/" class="card-link">Browse Local ./docs/ &rarr;</a>
+            <a href="https://github.com/GrahamPearl/Python_WormholeRunner/tree/main/docs" target="_blank" rel="noopener noreferrer" class="card-link">GitHub /docs Tree &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Source Code & Repository Navigation -->
+  <section id="source-nav">
+    <div class="container">
+      <div class="section-header">
+        <h2>Repository &amp; Source Code Navigation</h2>
+        <p>
+          Navigate directly from the root directory of <code>Python_WormholeRunner</code> to source scripts, documentation, and repository files.
+        </p>
+      </div>
+
+      <div class="repo-tree" role="region" aria-label="Repository Directory Structure">
+<div><strong>Python_WormholeRunner/</strong> <span class="tree-comment"># Repository Root (Current Location)</span></div>
+<div>├── <a href="./index.html">index.html</a> <span class="tree-comment"># Educator portfolio, project brief &amp; root landing page</span></div>
+<div>├── <a href="./README.md">README.md</a> <span class="tree-comment"># Quickstart setup, dependencies &amp; execution instructions</span></div>
+<div>├── <a href="./docs/index.html">docs/index.html</a> <span class="tree-comment"># Interactive project documentation home</span></div>
+<div>├── <a href="https://github.com/GrahamPearl/Python_WormholeRunner/tree/main/docs" target="_blank" rel="noopener noreferrer">docs/</a> <span class="tree-comment"># Classroom handouts, design specs &amp; static web assets</span></div>
+<div>└── <a href="https://github.com/GrahamPearl/Python_WormholeRunner" target="_blank" rel="noopener noreferrer">src / *.py (Repository Files)</a> <span class="tree-comment"># Python game loop, entities, assets &amp; unit tests on GitHub</span></div>
+      </div>
+
+      <div class="cta-group" style="margin-top: 1.75rem;">
+        <a href="https://github.com/GrahamPearl/Python_WormholeRunner" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Explore Full Source Code on GitHub</a>
+        <a href="./README.md" class="btn btn-secondary">Read README.md</a>
+        <a href="./docs/index.html" class="btn btn-secondary">Go to docs/index.html</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <strong>Graham Pearl</strong> &bull; Digital Technologies Portfolio &bull; Aotearoa New Zealand
+      </div>
+      <div>
+        <a href="https://github.com/GrahamPearl/Python_WormholeRunner" target="_blank" rel="noopener noreferrer">GitHub Repository</a> &middot;
+        <a href="./docs/index.html">Documentation (docs/index.html)</a> &middot;
+        <a href="#portfolio">Back to Top &uarr;</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
