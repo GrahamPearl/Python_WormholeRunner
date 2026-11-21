@@ -1,0 +1,14 @@
+:root { --gold:#ffd040; --bg:#060816; }
+* { box-sizing: border-box; }
+html, body { margin:0; height:100%; background:var(--bg); color:#fff; font-family:"Courier New",monospace; }
+body { display:flex; align-items:center; justify-content:center; }
+#stage { position:relative; width:min(100vw, calc(100vh * 16 / 9)); aspect-ratio:16/9; }
+canvas { width:100%; height:100%; display:block; background:var(--bg); image-rendering:auto; }
+.overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:.6em; text-align:center; background:rgba(6,8,22,.72); font-size:clamp(12px,1.6vw,20px); }
+.overlay h1 { margin:0; font-size:3em; color:var(--gold); letter-spacing:.1em; }
+.overlay .red { color:#eb4646; }
+.hidden { display:none; }
+button { font:inherit; font-size:1.2em; padding:.5em 1.4em; color:#000; background:var(--gold); border:0; border-radius:8px; cursor:pointer; }
+button:hover, button:focus-visible { background:#fff; outline:none; }
+.stats { color:var(--gold); } .help { color:#96a0b9; font-size:.8em; }
