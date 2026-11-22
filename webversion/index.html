@@ -2,23 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#060816">
 <title>Wormhole Runner</title>
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 <div id="stage">
-  <canvas id="game" width="1280" height="720"></canvas>
-  <div id="loading" class="overlay"><h1>WORMHOLE RUNNER</h1><p>Loading...</p></div>
-  <div id="menu" class="overlay hidden">
-    <h1>WORMHOLE RUNNER</h1><p>Dodge the rocks. Find the wormhole.</p>
-    <button id="play">Play (Enter)</button>
-    <p class="stats" id="best"></p>
-    <p class="help">UP/DOWN speed &middot; LEFT/RIGHT turn &middot; SPACE fire &middot; 1-3 weapons &middot; P pause &middot; ESC menu</p>
+  <canvas id="game" width="1280" height="720" aria-label="Wormhole Runner game area"></canvas>
+  <div id="screen" class="overlay"><div class="panel"><h1>WORMHOLE RUNNER</h1><p id="load-text">Loading...</p></div></div>
+  <div id="topbar">
+    <button data-top="pause" aria-label="Pause">❚❚</button>
+    <button data-top="mute" aria-label="Mute or unmute sound" aria-pressed="false">🔊</button>
+    <button data-top="full" aria-label="Fullscreen">⛶</button>
+    <button data-top="settings" aria-label="Settings">⚙</button>
   </div>
-  <div id="paused" class="overlay hidden"><h1>PAUSED</h1><p>Press P to resume</p></div>
-  <div id="gameover" class="overlay hidden"><h1 class="red">GAME OVER</h1><p id="final"></p><p>ENTER = play again &middot; ESC = menu</p></div>
 </div>
+<noscript>This game needs JavaScript.</noscript>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

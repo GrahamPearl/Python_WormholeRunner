@@ -1,39 +1,62 @@
-import { rad } from './utils.js';
+import { settings } from './config.js';
+import { clamp } from './utils.js';
 
-const mk = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); return c; };
-const poly = (g, pts, fill, stroke) => { g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fillStyle = fill; g.fill(); if (stroke) { g.strokeStyle = stroke; g.lineWidth = 2; g.stroke(); } };
-const disc = (g, x, y, r, fill) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fillStyle = fill; g.fill(); };
+const mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, w); c.height = Math.max(1, h); return c; };
+const hue = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; };
 
-// Generated fallbacks, used when assets/images/<name>.png is missing.
-const ART = {
-  ship: () => mk(64, 64, g => { poly(g, [[27, 46], [32, 58], [37, 46]], '#ffaa28'); poly(g, [[32, 6], [52, 52], [32, 43], [12, 52]], '#bed2eb', '#fff'); disc(g, 32, 27, 5, '#468cdc'); }),
-  rock: () => mk(64, 64, g => { let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
-    poly(g, Array.from({ length: 14 }, (_, k) => { const a = k / 14 * 6.283, d = 21 + r() * 8; return [32 + d * Math.cos(a), 32 + d * Math.sin(a)]; }), '#78695c', '#beafa0');
-    for (let i = 0; i < 3; i++) disc(g, 20 + r() * 24, 20 + r() * 24, 3 + r() * 3, '#554a42'); }),
-  drifter: () => mk(64, 64, g => { g.fillStyle = '#46aa5a'; g.beginPath(); g.ellipse(32, 36, 24, 10, 0, 0, 7); g.fill(); disc(g, 32, 24, 10, 'rgba(150,230,255,.8)'); }),
-  chaser: () => mk(64, 64, g => { poly(g, [[27, 46], [32, 58], [37, 46]], '#ffc83c'); poly(g, [[32, 6], [48, 52], [32, 42], [16, 52]], '#d23c3c', '#ffc8c8'); disc(g, 32, 26, 4, '#fff078'); }),
-  bullet: () => mk(12, 28, g => poly(g, [[6, 0], [11, 8], [11, 24], [6, 27], [1, 24], [1, 8]], '#ffe650')),
-  wormhole: () => mk(128, 128, g => { for (let k = 0; k < 8; k++) { g.beginPath(); g.arc(64, 64, 60 - k * 7, 0, 7); g.strokeStyle = `rgb(${(255 - k * 22) / 2},${80 + k * 10},${255 - k * 22})`; g.lineWidth = 3; g.stroke(); }
-    for (let a = 0; a < 4; a++) { g.beginPath(); g.arc(64, 64, 52, rad(a * 90), rad(a * 90 + 50)); g.strokeStyle = '#d2aaff'; g.lineWidth = 5; g.stroke(); } disc(g, 64, 64, 14, '#080019'); }),
-  speed: () => pu('#ffdc3c', g => poly(g, [[18, 4], [8, 18], [15, 18], [13, 28], [24, 13], [17, 13]], '#ffdc3c')),
-  health: () => pu('#50e66e', g => { g.fillStyle = '#50e66e'; g.fillRect(13, 7, 6, 18); g.fillRect(7, 13, 18, 6); }),
-  shield: () => pu('#5adcff', g => { g.beginPath(); g.arc(16, 16, 8, 0, 7); g.strokeStyle = '#5adcff'; g.lineWidth = 3; g.stroke(); }),
-  ammo: () => pu('#ff963c', g => { g.fillStyle = '#ff963c'; [8, 14, 20].forEach(x => g.fillRect(x, 8, 3, 16)); }),
-};
-const pu = (c, f) => mk(32, 32, g => { disc(g, 16, 16, 15, '#14192d'); g.beginPath(); g.arc(16, 16, 14, 0, 7); g.strokeStyle = c; g.lineWidth = 2; g.stroke(); f(g); });
+/** Built-in drawing used when a PNG is missing: a simple coloured shape per kind of sprite. */
+function fallback(file, fw, fh, frames) {
+  const c = mk(fw * frames, fh), g = c.getContext('2d'), col = `hsl(${hue(file)},70%,60%)`;
+  for (let i = 0; i < frames; i++) {
+    g.save(); g.translate(i * fw + fw / 2, fh / 2); g.fillStyle = col; g.strokeStyle = '#fff'; g.lineWidth = 2; g.beginPath();
+    const r = Math.min(fw, fh) * 0.42;
+    if (/ship|ally|chaser|sniper|seeker/.test(file)) { g.moveTo(0, -r); g.lineTo(r * .7, r); g.lineTo(0, r * .6); g.lineTo(-r * .7, r); g.closePath(); }
+    else if (/bullet|powerup|crystal|pod/.test(file)) g.arc(0, 0, r * (/bullet/.test(file) ? .4 : 1), 0, 7);
+    else g.ellipse(0, 0, r, r * (/rock/.test(file) ? 1 : .7), 0, 0, 7);
+    g.fill(); g.stroke(); g.restore();
+  }
+  return c;
+}
 
-/** Preloads every image with Promise.all; a missing file falls back to generated art. */
-export class AssetLoader {
-  constructor() { this.img = {}; }
-  async load(onProgress = () => {}) {
-    const names = Object.keys(ART); let n = 0;
-    await Promise.all(names.map(name => new Promise(res => {
+/** Loads sprite sheets (PNG rows of frames) with Promise.all; missing files use generated shapes. */
+export class Assets {
+  constructor() { this.sheets = new Map(); this.tints = new Map(); }
+  files() { return [...new Set(Object.values(settings.get('graphics')).map(s => s.file))]; }
+  loadFile(file) {
+    return new Promise(res => {
       const im = new Image();
-      im.onload = () => { this.img[name] = im; done(); };
-      im.onerror = () => { this.img[name] = ART[name](); done(); };
-      im.src = `assets/images/${name}.png`;
-      const done = () => { onProgress(++n / names.length); res(); };
-    })));
+      im.onload = () => { this.sheets.set(file, im); this.tints.clear(); res(); };
+      im.onerror = () => res();
+      im.src = `assets/images/${file}`;
+    });
+  }
+  async load(progress = () => {}) {
+    const files = this.files(); let n = 0;
+    await Promise.all(files.map(f => this.loadFile(f).then(() => progress(++n / files.length))));
     return this;
+  }
+  sheet(file, spec) {
+    const s = this.sheets.get(file);
+    if (s) return s;
+    const key = `fb:${file}:${spec.frame_w}x${spec.frame_h}x${spec.frames}`;
+    if (!this.sheets.has(key)) this.sheets.set(key, fallback(file, spec.frame_w, spec.frame_h, spec.frames));
+    if (!this.sheets.has('req:' + file)) { this.sheets.set('req:' + file, 1); this.loadFile(file); }   // pick up files added in the editor
+    return this.sheets.get(key);
+  }
+  tinted(file, spec, tint) {
+    const key = `${file}|${tint}|${spec.frame_w}`;
+    let c = this.tints.get(key); if (c) return c;
+    const src = this.sheet(file, spec); c = mk(src.width, src.height); const g = c.getContext('2d');
+    g.drawImage(src, 0, 0); g.globalCompositeOperation = 'multiply'; g.fillStyle = tint; g.fillRect(0, 0, c.width, c.height);
+    g.globalCompositeOperation = 'destination-in'; g.drawImage(src, 0, 0);
+    this.tints.set(key, c); return c;
+  }
+  /** Draw sprite `name` at world-pixel (x, y) with the y-axis already flipped by the caller. */
+  draw(g, name, x, y, angle, scale, alpha, t, tint) {
+    const sp = settings.get('graphics.' + name); if (!sp) return;
+    const frames = Math.max(1, sp.frames | 0), f = sp.fps > 0 && frames > 1 ? Math.floor(t * sp.fps) % frames : 0;
+    const im = tint ? this.tinted(sp.file, sp, tint) : this.sheet(sp.file, sp), fw = sp.frame_w, fh = sp.frame_h;
+    g.save(); g.globalAlpha = clamp(alpha, 0, 1); g.translate(x, y); g.rotate(angle * Math.PI / 180); g.scale(scale, scale);
+    g.drawImage(im, f * fw, 0, fw, fh, -fw / 2, -fh / 2, fw, fh); g.restore();
   }
 }
